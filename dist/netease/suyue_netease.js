@@ -81,8 +81,10 @@ function formatAlbumItem(_) {
     };
 }
 function musicCanPlayFilter(_) {
-    return (_.fee === 0 || _.fee === 8) && _.privilege.st >= 0;
+    //return (_.fee === 0 || _.fee === 8) && _.privilege.st >= 0;
+    return true;
 }
+
 const pageSize = 30;
 async function searchBase(query, page, type) {
     const data = {
