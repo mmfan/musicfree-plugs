@@ -73,7 +73,7 @@ async function getMediaSourceJxcxin(musicId) {
     const servercontent = (await (0, axios_1.default)({
         url: desUrl,
         method: 'get',
-        timeout: 1000,
+        timeout: 100,
     })).data;
     console.log(servercontent);
     if (servercontent.code == 200) {
