@@ -8,8 +8,8 @@
 原始插件仓库：https://github.com/maotoumao/MusicFreePlugins
 
 
-VIP源插件：酷我：http://adad23u.appinstall.life/dist/kuwo/index.js
-          酷狗：http://adad23u.appinstall.life/dist/kugou/index.js
-          qq：http://adad23u.appinstall.life/dist/qq/index.js
-          咪咕：http://adad23u.appinstall.life/dist/migu/index.js
+酷我：http://adad23u.appinstall.life/dist/kuwo/index.js
+酷狗：http://adad23u.appinstall.life/dist/kugou/index.js
+qq：http://adad23u.appinstall.life/dist/qq/index.js
+咪咕：http://adad23u.appinstall.life/dist/migu/index.js
 
