@@ -638,11 +638,11 @@ async function getMusicSheetInfo(sheet, page) {
     };
 }
 module.exports = {
-    platform: "云音乐",
+    platform: "酷我",
     version: "0.1.12",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
-    srcUrl: "http://adad23u.appinstall.life/dist/kuwo/index.js",
+    srcUrl: "",//"http://adad23u.appinstall.life/dist/kuwo/index.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [

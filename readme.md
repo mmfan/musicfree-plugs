@@ -4,3 +4,12 @@
 
 ---
 本仓库的插件只是示例，来自于网络公开的接口，**并过滤掉所有VIP/收费/试听歌曲**。仅供学习参考使用，请不要用于任何商业用途，合理合法使用。
+
+原始插件仓库：https://github.com/maotoumao/MusicFreePlugins
+
+
+VIP源插件：酷我：http://adad23u.appinstall.life/dist/kuwo/index.js
+          酷狗：http://adad23u.appinstall.life/dist/kugou/index.js
+          qq：http://adad23u.appinstall.life/dist/qq/index.js
+          咪咕：http://adad23u.appinstall.life/dist/migu/index.js
+
