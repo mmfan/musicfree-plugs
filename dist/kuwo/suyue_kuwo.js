@@ -638,7 +638,7 @@ async function getMusicSheetInfo(sheet, page) {
     };
 }
 module.exports = {
-    platform: "酷我",
+    platform: "酷我音乐",
     version: "0.1.12",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
