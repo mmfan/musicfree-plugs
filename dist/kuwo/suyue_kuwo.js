@@ -642,7 +642,7 @@ module.exports = {
     version: "0.1.12",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
-    srcUrl: "",//"http://adad23u.appinstall.life/dist/kuwo/index.js",
+    srcUrl: "https://agit.ai/vale_gtt/music_api/raw/branch/master/dist/kuwo/suyue_kuwo.js",//"http://adad23u.appinstall.life/dist/kuwo/index.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [
