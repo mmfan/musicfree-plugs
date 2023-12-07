@@ -73,7 +73,7 @@ async function getMediaSourceJxcxin(musicId) {
     const servercontent = (await (0, axios_1.default)({
         url: desUrl,
         method: 'get',
-        timeout: 3000,
+        timeout: 1000,
     })).data;
     console.log(servercontent);
     if (servercontent.code == 200) {
@@ -332,7 +332,7 @@ async function getLyric(musicItem) {
     const res = (await (0, axios_1.default)({
         method: "get",
         url: "http://m.kuwo.cn/newh5/singles/songinfoandlrc",
-        timeout: 20000,
+        timeout: 10000,
         params: {
             musicId: musicItem.id,
             httpStatus: 1,
