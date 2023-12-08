@@ -65,7 +65,8 @@ async function searchMusic(query, page) {
             showtype: 1,
         },
     })).data;
-    const songs = res.data.info.filter(validMusicFilter).map(formatMusicItem);
+    // const songs = res.data.info.filter(validMusicFilter).map(formatMusicItem);
+    const songs = res.data.info.map(formatMusicItem);//delete filter
     return {
         isEnd: page * pageSize >= res.data.total,
         data: songs,
