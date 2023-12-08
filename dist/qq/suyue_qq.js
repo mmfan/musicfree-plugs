@@ -592,7 +592,7 @@ module.exports = {
     platform: "QQ音乐",
     version: "0.1.10",
     order: 20,
-    srcUrl: "http://adad23u.appinstall.life/dist/qq/index.js",
+    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/qq/suyue_qq.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [
