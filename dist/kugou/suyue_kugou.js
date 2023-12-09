@@ -142,7 +142,9 @@ async function getMediaSource(musicItem, quality) {
         hash = musicItem.origin_hash;
     }
     if (!hash) {
-        return;
+        // return;
+        hash = musicItem["320hash"];//若无音质可选，则使用标准音质
+
     }
     const res = (await axios_1.default.get("https://wwwapi.kugou.com/yy/index.php", {
         headers,
@@ -156,14 +158,18 @@ async function getMediaSource(musicItem, quality) {
             _: Date.now(),
         },
     })).data.data;
-    const url = res.play_url || res.play_backup_url;
-    if (!url) {
-        return;
+    
+    //酷狗音源是部分免费（VIP）时，寻找其他音源
+    if(!res.is_free_part)
+    {
+        const url = res.play_url || res.play_backup_url;
+        if (!url) {
+            return;
+        }
     }
-    return {
-        url,
-        rawLrc: res.lyrics,
-        artwork: res.img,
+    else {
+        // let url_1 = await Soapi_mp3(musicItem.artist, musicItem.title);
+        return await Soapi_mp3(musicItem.artist, musicItem.title);
     };
 }
 async function getTopLists() {
