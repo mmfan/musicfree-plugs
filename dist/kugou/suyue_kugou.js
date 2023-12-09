@@ -173,6 +173,12 @@ async function getMediaSource(musicItem, quality) {
         res.play_backup_url = url_1.url;
         return;
     };
+
+    return {
+        url: res.play_url,
+        rawLrc: res.lyrics,
+        artwork: res.img,
+    };
 }
 
 async function Soapi_mp3(singerName, songName) {
