@@ -168,9 +168,11 @@ async function getMediaSource(musicItem, quality) {
         }
     }
     else {
-        let url_1 = await Soapi_mp3(musicItem.artist, musicItem.title);
-        url = url_1.url;
+        let url_1 = await Soapi_mp3(musicItem.artist, musicItem.title).url;
         // return await Soapi_mp3(musicItem.artist, musicItem.title);
+        res.play_url = url_1;
+        res.play_backup_url = url_1;
+        return;
     };
 }
 
