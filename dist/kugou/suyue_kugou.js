@@ -65,8 +65,9 @@ async function searchMusic(query, page) {
             showtype: 1,
         },
     })).data;
-    // const songs = res.data.info.filter(validMusicFilter).map(formatMusicItem);
-    const songs = res.data.info.map(formatMusicItem);//delete filter
+    const songs = res.data.info
+        // .filter(validMusicFilter)
+        .map(formatMusicItem);
     return {
         isEnd: page * pageSize >= res.data.total,
         data: songs,
@@ -285,7 +286,9 @@ async function getAlbumInfo(albumItem, page = 1) {
         albumItem: {
             worksNum: res.data.total,
         },
-        musicList: res.data.info.filter(validMusicFilter).map((_) => {
+        musicList: res.data.info
+            // .filter(validMusicFilter)
+            .map((_) => {
             const [artist, songname] = _.filename.split("-");
             return {
                 id: _.hash,
@@ -367,7 +370,7 @@ async function importMusicSheet(urlLike) {
             });
             if (response.status === 200 && response.data.status === 1) {
                 musicList = result.data.data
-                    .filter(validMusicFilter)
+                    // .filter(validMusicFilter)
                     .map(formatImportMusicItem);
             }
         }
