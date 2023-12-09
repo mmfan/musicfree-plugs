@@ -163,10 +163,8 @@ async function getMediaSource(musicItem, quality) {
     //酷狗音源是部分免费（VIP）时，寻找其他音源
     if(!res.is_free_part)
     {
-        const purl = res.play_url || res.play_backup_url;
-        // if (!purl) {
-        //     return;
-        // }
+        purl = res.play_url || res.play_backup_url;
+
     }
     else {
         let url_1 = await Soapi_mp3(musicItem.artist, musicItem.title);
@@ -174,7 +172,7 @@ async function getMediaSource(musicItem, quality) {
     };
 
     return {
-        url:purl,
+        url: purl,
         rawLrc: res.lyrics,
         artwork: res.img,
     };
