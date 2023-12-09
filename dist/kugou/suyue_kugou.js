@@ -170,7 +170,8 @@ async function getMediaSource(musicItem, quality) {
         const url_1 = await Soapi_mp3(musicItem.artist, musicItem.title);
         purl = url_1.url;
     };
-
+    
+    console.log("播放音源：",purl);
     return {
         url: purl,
         rawLrc: res.lyrics,
