@@ -171,7 +171,7 @@ async function getMediaSource(musicItem, quality) {
         let url_1 = await Soapi_mp3(musicItem.artist, musicItem.title);
         res.play_url = url_1.url;
         res.play_backup_url = url_1.url;
-        return;
+        // return;
     };
 
     return {
