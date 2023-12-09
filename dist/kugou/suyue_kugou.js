@@ -171,7 +171,7 @@ async function getMediaSource(musicItem, quality) {
         purl = url_1.url;
     };
     
-    console.log("播放音源：",purl);
+    console.log("酷狗播放音源：",purl);
     return {
         url: purl,
         rawLrc: res.lyrics,
