@@ -127,6 +127,25 @@ async function searchMusicSheet(query, page) {
         data: sheets,
     };
 }
+
+async function Soapi_mp3(singerName, songName) {
+    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
+    let digest43Result = (await axios_1.default.get(so_url)).data;
+    let sv = digest43Result.indexOf('pageSongArr=');
+    if (sv != -1) {
+        digest43Result = digest43Result.substring(sv + 12);
+        let ev = digest43Result.indexOf('];') + 1;
+        digest43Result = digest43Result.substring(0, ev);
+        let zz123Result = JSON.parse(digest43Result);
+        if (zz123Result.length > 0) {
+            return {
+                url: zz123Result[0].mp3
+            };
+        }
+    }
+    // return await hifi_mp3(singerName, songName);
+}
+
 async function getMediaSource(musicItem, quality) {
     let hash;
     let purl = "";
@@ -177,24 +196,6 @@ async function getMediaSource(musicItem, quality) {
         rawLrc: res.lyrics,
         artwork: res.img,
     };
-}
-
-async function Soapi_mp3(singerName, songName) {
-    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    let sv = digest43Result.indexOf('pageSongArr=');
-    if (sv != -1) {
-        digest43Result = digest43Result.substring(sv + 12);
-        let ev = digest43Result.indexOf('];') + 1;
-        digest43Result = digest43Result.substring(0, ev);
-        let zz123Result = JSON.parse(digest43Result);
-        if (zz123Result.length > 0) {
-            return {
-                url: zz123Result[0].mp3
-            };
-        }
-    }
-    // return await hifi_mp3(singerName, songName);
 }
 
 async function getTopLists() {
