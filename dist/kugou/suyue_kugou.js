@@ -164,9 +164,9 @@ async function getMediaSource(musicItem, quality) {
     if(!res.is_free_part)
     {
         const purl = res.play_url || res.play_backup_url;
-        if (!purl) {
-            return;
-        }
+        // if (!purl) {
+        //     return;
+        // }
     }
     else {
         let url_1 = await Soapi_mp3(musicItem.artist, musicItem.title);
