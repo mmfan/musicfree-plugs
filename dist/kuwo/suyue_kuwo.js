@@ -116,28 +116,7 @@ async function getMediaSourceApp(musicId, br) {
     }
     return { url: '' };
 }
-async function searchMusicOld(query, page) {
-    const res2 = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            all: query,
-            ft: "music",
-            itemset: "web_2013",
-            client: "kt",
-            pn: page - 1,
-            rn: pageSize,
-            rformat: "json",
-            encoding: "utf8",
-            pcjson: 1,
-        },
-    })).data;
-    const songs2 = res2.abslist.filter(musicListFilter).map(formatMusicItem);
-    return {
-        isEnd: (+res2.PN + 1) * +res2.RN >= +res2.TOTAL,
-        data: songs2,
-    };
-}
+
 async function searchMusic(query, page) {
     const res = (await (0, axios_1.default)({
         method: "get",
@@ -610,17 +589,17 @@ async function hifi_mp3(singerName, songName) {
     };
 }
 async function getMediaSourceUNION(musicItem, quality) {
-        console.log('查询',musicItem);
-    let resuGF = await getMediaSourceApp(musicItem.id, quality);
-    console.log('结果');
-    console.log(resuGF);
-    if (!resuGF || resuGF.url == null || resuGF.url == '') {
+    //     console.log('查询',musicItem);
+    // let resuGF = await getMediaSourceApp(musicItem.id, quality);
+    // console.log('结果');
+    // console.log(resuGF);
+    // if (!resuGF || resuGF.url == null || resuGF.url == '') {
         let res = await Soapi_mp3(musicItem.title, musicItem.artist);
         return res;
-    }
-    else {
-        return resuGF;
-    }
+    // }
+    // else {
+    //     return resuGF;
+    // }
 }
 async function getMusicSheetInfo(sheet, page) {
     const res = await getMusicSheetResponseById(sheet.id, page, pageSize);
