@@ -158,7 +158,7 @@ async function getMediaSource(musicItem, quality) {
             _: Date.now(),
         },
     })).data.data;
-    
+
     //酷狗音源是部分免费（VIP）时，寻找其他音源
     if(!res.is_free_part)
     {
@@ -172,6 +172,25 @@ async function getMediaSource(musicItem, quality) {
         return await Soapi_mp3(musicItem.artist, musicItem.title);
     };
 }
+
+async function Soapi_mp3(singerName, songName) {
+    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
+    let digest43Result = (await axios_1.default.get(so_url)).data;
+    let sv = digest43Result.indexOf('pageSongArr=');
+    if (sv != -1) {
+        digest43Result = digest43Result.substring(sv + 12);
+        let ev = digest43Result.indexOf('];') + 1;
+        digest43Result = digest43Result.substring(0, ev);
+        let zz123Result = JSON.parse(digest43Result);
+        if (zz123Result.length > 0) {
+            return {
+                url: zz123Result[0].mp3
+            };
+        }
+    }
+    // return await hifi_mp3(singerName, songName);
+}
+
 async function getTopLists() {
     const lists = (await axios_1.default.get("http://mobilecdnbj.kugou.com/api/v3/rank/list?version=9108&plat=0&showtype=2&parentid=0&apiver=6&area_code=1&withsong=0&with_res_tag=0", {
         headers: headers,
