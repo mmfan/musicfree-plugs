@@ -183,10 +183,10 @@ async function getMediaSource(musicItem, quality) {
 }
 
 async function so_MP3_API(musicItem) {
-    // return await zz123_mp3(musicItem.artist, musicItem.title);
+    return await zz123_mp3(musicItem.artist, musicItem.title);
     // return await jxcxin_mp3(musicItem.id);
     // return await hifi_mp3(musicItem.artist, musicItem.title);
-    return await slider_mp3(musicItem.artist, musicItem.title);
+    // return await slider_mp3(musicItem.artist, musicItem.title);
 }
 
 async function zz123_mp3(singerName, songName) {
