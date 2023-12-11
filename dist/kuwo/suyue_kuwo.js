@@ -453,7 +453,8 @@ async function getRecommendSheetTags() {
             title: _.name,
         })),
     }))
-        .filter((item) => item.data.length);
+        // .filter((item) => item.data.length)
+        ;
     const pinned = [
         {
             id: "1848",
