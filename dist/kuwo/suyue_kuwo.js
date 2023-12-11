@@ -570,20 +570,25 @@ async function hifi_mp3(singerName, songName) {
 
 async function getMediaSourceUNION(musicItem, quality) {
     console.log('查询',musicItem);
-
+    let purl = "";
     // 从酷我官方查找音源。遇到试听音源时，查找其他音源
-    let res = await getMediaSource_KW_API(musicItem.id);
+    const res = await getMediaSource_KW_API(musicItem.id);
     console.log('酷我音源结果：',res);
 
     if (res && res.url != null && res.url != '') {
-        return res.url;
+        purl = res.url;
     }
     else
     {
-        let res_3rd = await so_MP3_API(musicItem);
-        return res_3rd.url
+        const res_3rd = await Soapi_mp3(musicItem.title, musicItem.artist);
+        purl = res_3rd.url;
     }
 
+    return {
+        url: purl,
+        rawLrc: res.lyrics,
+        artwork: res.img,
+    };
 }
 
 
@@ -642,10 +647,8 @@ module.exports = {
         else {
             br = "flac";
         }
-        const res = await getMediaSourceUNION(musicItem, br);
-        return {
-            url: res,
-        };
+        return await getMediaSourceUNION(musicItem, br);
+
     },
     getAlbumInfo,
     getLyric,
