@@ -107,7 +107,9 @@ async function searchMusic(query, page) {
             issubtitle: 1
         },
     })).data;
-    const songs = res.abslist.filter(musicListFilter).map(formatMusicItem);
+    const songs = res.abslist
+        // .filter(musicListFilter)
+        .map(formatMusicItem);
     return {
         isEnd: (+res.PN + 1) * +res.RN >= +res.TOTAL,
         data: songs,
@@ -126,7 +128,9 @@ async function searchMusic2(query, page) {
     if (page >= totalpage) {
         isEnd = true;
     }
-    const songs = res.data.list.filter(musicListFilter).map(formatMusicItemApp);
+    const songs = res.data.list
+        // .filter(musicListFilter)
+        .map(formatMusicItemApp);
     return {
         isEnd: isEnd,
         data: songs,
@@ -221,7 +225,9 @@ async function getArtistMusicWorks(artistItem, page) {
             pcjson: 1,
         },
     })).data;
-    const songs = res.musiclist.filter(musicListFilter).map((_) => {
+    const songs = res.musiclist
+        // .filter(musicListFilter)
+        .map((_) => {
         return {
             id: _.musicrid,
             artwork: artworkShort2Long(_.web_albumpic_short),
@@ -260,7 +266,9 @@ async function getArtistAlbumWorks(artistItem, page) {
             pcjson: 1,
         },
     })).data;
-    const albums = res.albumlist.filter(musicListFilter).map(formatAlbumItem);
+    const albums = res.albumlist
+        // .filter(musicListFilter)
+        .map(formatAlbumItem);
     return {
         isEnd: (+res.pn + 1) * pageSize >= +res.total,
         data: albums,
@@ -311,7 +319,9 @@ async function getAlbumInfo(albumItem) {
             pcjson: 1,
         },
     })).data;
-    const songs = res.musiclist.filter(musicListFilter).map((_) => {
+    const songs = res.musiclist
+        // .filter(musicListFilter)
+        .map((_) => {
         return {
             id: _.id,
             artwork: albumItem.artwork ?? res.img,
@@ -410,7 +420,9 @@ async function importMusicSheet(urlLike) {
             if (isNaN(totalPage)) {
                 totalPage = 1;
             }
-            musicList = musicList.concat(data.musicList.filter(musicListFilter).map((_) => ({
+            musicList = musicList.concat(data.musicList
+                    // .filter(musicListFilter)
+                    .map((_) => ({
                 id: _.id,
                 title: he.decode(_.name || ""),
                 artist: he.decode(_.artist || ""),
@@ -596,7 +608,9 @@ async function getMusicSheetInfo(sheet, page) {
     const res = await getMusicSheetResponseById(sheet.id, page, pageSize);
     return {
         isEnd: page * pageSize >= res.total,
-        musicList: res.musiclist.filter(musicListFilter).map((_) => ({
+        musicList: res.musiclist
+            // .filter(musicListFilter)
+            .map((_) => ({
             id: _.id,
             title: he.decode(_.name || ""),
             artist: he.decode(_.artist || ""),
