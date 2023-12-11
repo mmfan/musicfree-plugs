@@ -593,7 +593,7 @@ async function getMediaSourceUNION(musicItem, quality) {
     }
     else
     {
-        const res_3rd = await Soapi_mp3(musicItem.title, musicItem.artist);
+        const res_3rd = await so_MP3_API(musicItem);
         purl = res_3rd.url;
     }
 
