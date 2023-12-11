@@ -73,7 +73,7 @@ function formatMusicSheet(_) {
 async function getMediaSource_KW_API(musicId) {
     const desUrl = `https://apis.jxcxin.cn/api/kuwo?id=${musicId}&type=json&apiKey=c452fc69e6ef7199b49b310b4afa26a1`;
     const servercontent = (await axios_1.default.get(desUrl)).data;
-    console.log(servercontent);
+    // console.log(servercontent);
     // if (servercontent.code == 200) {
     //     return servercontent.data;
     // }
@@ -581,7 +581,7 @@ async function getMediaSourceUNION(musicItem, quality) {
     else
     {
         let res_3rd = await so_MP3_API(musicItem);
-        return res_3rd.url;
+        return res_3rd.url
     }
 
 }
@@ -642,7 +642,10 @@ module.exports = {
         else {
             br = "flac";
         }
-        return await getMediaSourceUNION(musicItem, br);
+        const res = await getMediaSourceUNION(musicItem, br);
+        return {
+            url: res,
+        };
     },
     getAlbumInfo,
     getLyric,
