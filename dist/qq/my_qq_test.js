@@ -527,10 +527,10 @@ async function Official_MP3_API(musicItem, quality = "128"){
 //搜索第三方音源
 async function Thrd_MP3_API(musicItem) {
 
-    return await zz123_mp3(musicItem.artist, musicItem.title);
+    // return await zz123_mp3(musicItem.artist, musicItem.title);
     // return await jxcxin_mp3(musicItem.id);
     // return await hifi_mp3(musicItem.artist, musicItem.title);
-    // return await slider_mp3(musicItem.artist, musicItem.title);
+    return await slider_mp3(musicItem.artist, musicItem.title);
     // return await free_mp3(musicItem.artist, musicItem.title);
 }
 
@@ -551,6 +551,29 @@ async function zz123_mp3(singerName, songName) {
                 url: zz123Result[0].mp3
             };
         }
+    }
+}
+
+async function slider_mp3(singerName, songName) {
+    //从slider.kz获取音源
+    let purl = "";
+    let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(singerName)}-${encodeURIComponent(songName)}`;
+    console.log(serverUrl);
+    let res = (await (0, axios_1.default)({
+        method: "GET",
+        url: serverUrl,
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    console.log(res);
+    if (res.audios[''].length > 0) {
+        purl = res.audios[''][0].url;
+        if (purl.indexOf("http") == -1) {
+            purl = "https://slider.kz/" + purl;
+        }
+         return {
+            url: purl,
+          };
     }
 }
 
