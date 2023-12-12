@@ -21,6 +21,7 @@ function formatMusicItem(_) {
         albummid: albummid,
     };
 }
+
 function formatAlbumItem(_) {
     return {
         id: _.albumID || _.albumid,
@@ -35,6 +36,7 @@ function formatAlbumItem(_) {
         description: _.desc,
     };
 }
+
 function formatArtistItem(_) {
     return {
         name: _.singerName,
@@ -44,6 +46,7 @@ function formatArtistItem(_) {
         worksNum: _.songNum,
     };
 }
+
 const searchTypeMap = {
     0: "song",
     2: "album",
@@ -52,14 +55,17 @@ const searchTypeMap = {
     7: "lyric",
     12: "mv",
 };
+
 const headers = {
     referer: "https://y.qq.com",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
     Cookie: "uin=",
 };
+
 const validSongFilter = (item) => {
     return true;
 };
+
 async function searchBase(query, page, type) {
     const res = (await (0, axios_1.default)({
         url: "https://u.y.qq.com/cgi-bin/musicu.fcg",
@@ -85,6 +91,7 @@ async function searchBase(query, page, type) {
         data: res.req_1.data.body[searchTypeMap[type]].list,
     };
 }
+
 async function searchMusic(query, page) {
     const songs = await searchBase(query, page, 0);
     return {
@@ -92,6 +99,7 @@ async function searchMusic(query, page) {
         data: songs.data.filter(validSongFilter).map(formatMusicItem),
     };
 }
+
 async function searchAlbum(query, page) {
     const albums = await searchBase(query, page, 2);
     return {
@@ -99,6 +107,7 @@ async function searchAlbum(query, page) {
         data: albums.data.map(formatAlbumItem),
     };
 }
+
 async function searchArtist(query, page) {
     const artists = await searchBase(query, page, 1);
     return {
@@ -106,6 +115,7 @@ async function searchArtist(query, page) {
         data: artists.data.map(formatArtistItem),
     };
 }
+
 async function searchMusicSheet(query, page) {
     const musicSheet = await searchBase(query, page, 3);
     return {
@@ -122,6 +132,7 @@ async function searchMusicSheet(query, page) {
         })),
     };
 }
+
 function getQueryFromUrl(key, search) {
     try {
         const sArr = search.split("?");
@@ -144,6 +155,7 @@ function getQueryFromUrl(key, search) {
         return key ? "" : {};
     }
 }
+
 function changeUrlQuery(obj, baseUrl) {
     const query = getQueryFromUrl(null, baseUrl);
     let url = baseUrl.split("?")[0];
@@ -156,6 +168,7 @@ function changeUrlQuery(obj, baseUrl) {
     });
     return `${url}?${queryArr.join("&")}`.replace(/\?$/, "");
 }
+
 const typeMap = {
     m4a: {
         s: "C400",
@@ -178,52 +191,7 @@ const typeMap = {
         e: ".flac",
     },
 };
-async function getSourceUrl(id, type = "128") {
-    const mediaId = id;
-    let uin = "";
-    const guid = (Math.random() * 10000000).toFixed(0);
-    const typeObj = typeMap[type];
-    const file = `${typeObj.s}${id}${mediaId}${typeObj.e}`;
-    const url = changeUrlQuery({
-        "-": "getplaysongvkey",
-        g_tk: 5381,
-        loginUin: uin,
-        hostUin: 0,
-        format: "json",
-        inCharset: "utf8",
-        outCharset: "utf-8¬ice=0",
-        platform: "yqq.json",
-        needNewCode: 0,
-        data: JSON.stringify({
-            req_0: {
-                module: "vkey.GetVkeyServer",
-                method: "CgiGetVkey",
-                param: {
-                    filename: [file],
-                    guid: guid,
-                    songmid: [id],
-                    songtype: [0],
-                    uin: uin,
-                    loginflag: 1,
-                    platform: "20",
-                },
-            },
-            comm: {
-                uin: uin,
-                format: "json",
-                ct: 19,
-                cv: 0,
-                authst: "",
-            },
-        }),
-    }, "https://u.y.qq.com/cgi-bin/musicu.fcg");
-    return (await (0, axios_1.default)({
-        method: "GET",
-        url: url,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-}
+
 async function getAlbumInfo(albumItem) {
     const url = changeUrlQuery({
         data: JSON.stringify({
@@ -259,6 +227,7 @@ async function getAlbumInfo(albumItem) {
         }),
     };
 }
+
 async function getArtistSongs(artistItem, page) {
     const url = changeUrlQuery({
         data: JSON.stringify({
@@ -290,6 +259,7 @@ async function getArtistSongs(artistItem, page) {
         data: res.singer.data.songlist.filter(validSongFilter).map(formatMusicItem),
     };
 }
+
 async function getArtistAlbums(artistItem, page) {
     const url = changeUrlQuery({
         data: JSON.stringify({
@@ -322,6 +292,7 @@ async function getArtistAlbums(artistItem, page) {
         data: res.singerAlbum.data.list.map(formatAlbumItem),
     };
 }
+
 async function getArtistWorks(artistItem, page, type) {
     if (type === "music") {
         return getArtistSongs(artistItem, page);
@@ -330,6 +301,7 @@ async function getArtistWorks(artistItem, page, type) {
         return getArtistAlbums(artistItem, page);
     }
 }
+
 async function getLyric(musicItem) {
     const result = (await (0, axios_1.default)({
         url: `http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=${musicItem.songmid}&pcachetime=${new Date().getTime()}&g_tk=5381&loginUin=0&hostUin=0&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0`,
@@ -343,6 +315,7 @@ async function getLyric(musicItem) {
         rawLrc: CryptoJs.enc.Base64.parse(res.lyric).toString(CryptoJs.enc.Utf8),
     };
 }
+
 async function importMusicSheet(urlLike) {
     let id;
     if (!id) {
@@ -368,6 +341,7 @@ async function importMusicSheet(urlLike) {
     const res = JSON.parse(result.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, ""));
     return res.cdlist[0].songlist.filter(validSongFilter).map(formatMusicItem);
 }
+
 async function getTopLists() {
     const list = await (0, axios_1.default)({
         url: "https://u.y.qq.com/cgi-bin/musicu.fcg?_=1577086820633&data=%7B%22comm%22%3A%7B%22g_tk%22%3A5381%2C%22uin%22%3A123456%2C%22format%22%3A%22json%22%2C%22inCharset%22%3A%22utf-8%22%2C%22outCharset%22%3A%22utf-8%22%2C%22notice%22%3A0%2C%22platform%22%3A%22h5%22%2C%22needNewCode%22%3A1%2C%22ct%22%3A23%2C%22cv%22%3A0%7D%2C%22topList%22%3A%7B%22module%22%3A%22musicToplist.ToplistInfoServer%22%2C%22method%22%3A%22GetAll%22%2C%22param%22%3A%7B%7D%7D%7D",
@@ -389,6 +363,7 @@ async function getTopLists() {
         })),
     }));
 }
+
 async function getTopListDetail(topListItem) {
     const res = await (0, axios_1.default)({
         url: `https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&data=%7B%22detail%22%3A%7B%22module%22%3A%22musicToplist.ToplistInfoServer%22%2C%22method%22%3A%22GetDetail%22%2C%22param%22%3A%7B%22topId%22%3A${topListItem.id}%2C%22offset%22%3A0%2C%22num%22%3A100%2C%22period%22%3A%22${topListItem.period ?? ""}%22%7D%7D%2C%22comm%22%3A%7B%22ct%22%3A24%2C%22cv%22%3A0%7D%7D`,
@@ -406,6 +381,7 @@ async function getTopListDetail(topListItem) {
             .map(formatMusicItem),
     };
 }
+
 async function getRecommendSheetTags() {
     const res = (await axios_1.default.get("https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_tag_conf.fcg?format=json&inCharset=utf8&outCharset=utf-8", {
         headers: {
@@ -430,6 +406,7 @@ async function getRecommendSheetTags() {
         data,
     };
 }
+
 async function getRecommendSheetsByTag(tag, page) {
     const pageSize = 20;
     const rawRes = (await axios_1.default.get("https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg", {
@@ -577,7 +554,6 @@ async function zz123_mp3(singerName, songName) {
     }
 }
 
-
 async function getMusicSheetInfo(sheet, page) {
     const data = await importMusicSheet(sheet.id);
     return {
@@ -585,6 +561,7 @@ async function getMusicSheetInfo(sheet, page) {
         musicList: data,
     };
 }
+
 module.exports = {
     platform: "QQ音乐",
     version: "0.1.10",
