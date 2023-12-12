@@ -118,7 +118,7 @@ async function searchBase(query, page, type) {
 async function searchMusic(query, page) {
     const res = await searchBase(query, page, 1);
     const songs = res.result.songs
-        .filter(musicCanPlayFilter)
+        // .filter(musicCanPlayFilter)
         .map(formatMusicItem);
     return {
         isEnd: res.result.songCount <= page * pageSize,
@@ -189,7 +189,9 @@ async function getArtistWorks(artistItem, page, type) {
         })).data;
         return {
             isEnd: true,
-            data: res.hotSongs.filter(musicCanPlayFilter).map(formatMusicItem),
+            data: res.hotSongs
+                // .filter(musicCanPlayFilter)
+                .map(formatMusicItem),
         };
     }
     else if (type === "album") {
@@ -258,7 +260,7 @@ async function getAlbumInfo(albumItem) {
     return {
         albumItem: { description: res.album.description },
         musicList: (res.songs || [])
-            .filter(musicCanPlayFilter)
+            // .filter(musicCanPlayFilter)
             .map(formatMusicItem),
     };
 }
@@ -285,10 +287,12 @@ async function getValidMusicItems(trackIds) {
             headers,
             data: urlencoded,
         })).data;
-        const validTrackIds = res.data.filter((_) => _.url).map((_) => _.id);
+        const validTrackIds = res.data
+            // .filter((_) => _.url)
+            .map((_) => _.id);
         const songDetails = (await axios_1.default.get(`https://music.163.com/api/song/detail/?id=${validTrackIds[0]}&ids=[${validTrackIds.join(",")}]`, { headers })).data;
         const validMusicItems = songDetails.songs
-            .filter((_) => _.fee === 0 || _.fee === 8)
+            // .filter((_) => _.fee === 0 || _.fee === 8)
             .map(formatMusicItem);
         return validMusicItems;
     }
@@ -492,6 +496,7 @@ async function getMusicSheetInfo(sheet, page) {
         ...extra
     };
 }
+
 module.exports = {
     platform: "网易云",
     version: "1.1.2",
