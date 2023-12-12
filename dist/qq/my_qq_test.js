@@ -461,9 +461,34 @@ async function getRecommendSheetsByTag(tag, page) {
         data,
     };
 }
-async function getMediaGloSource(musicItem, quality) {
+
+async function getMediaSource(musicItem, quality) {
     let purl = "";
-    let domain = "";
+
+    // 从官方获取歌曲信息
+    const result = await Official_MP3_API(musicItem.songmid, quality);
+    if (result.req_0 && result.req_0.data && result.req_0.data.midurlinfo) {
+        purl = result.req_0.data.midurlinfo[0].purl;
+    }
+   
+    // 如果未获取到音源，则从第三方平台获取音源
+    if (!purl) {
+        const url_1 = await Thrd_MP3_API(musicItem);
+        purl = url_1.url;
+    }
+
+    console.log("播放音源：",purl);
+    return {
+        url: purl,
+        // rawLrc: result.lyrics,
+        // artwork: result.img,
+    };
+}
+
+
+// 官方音乐信息，包括歌手、id、歌词、歌手照片等
+async function Official_MP3_API(musicItem, quality = "128"){
+
     let type = "128";
     if (quality === "standard") {
         type = "320";
@@ -474,62 +499,71 @@ async function getMediaGloSource(musicItem, quality) {
     else if (quality === "super") {
         type = "flac";
     }
-    const result = await getSourceUrl(musicItem.songmid, type);
-    if (result.req_0 && result.req_0.data && result.req_0.data.midurlinfo) {
-        purl = result.req_0.data.midurlinfo[0].purl;
-    }
-   
-    if (!purl) {
-        let serverUrl = `http://adad23u.appinstall.life/getmp3source/qq/sq/${musicItem.songmid}`;
-        let res = (await (0, axios_1.default)({
-            method: "GET",
-            url: serverUrl,
-            xsrfCookieName: "XSRF-TOKEN",
-            withCredentials: true,
-        })).data;
-        console.log(res);
-        if (res.url.indexOf("http") != -1) {
-            return {
-                url: res.url,
-            };
-        }
-        else {
-            return await Soapi_mp3(musicItem.artist, musicItem.title);
-        }
-    }
-     if (!purl) {
-        let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(musicItem.artist)}-${encodeURIComponent(musicItem.title)}`;
-        console.log(serverUrl);
-        let res = (await (0, axios_1.default)({
-            method: "GET",
-            url: serverUrl,
-            xsrfCookieName: "XSRF-TOKEN",
-            withCredentials: true,
-        })).data;
-        if (res.audios[''].length > 0) {
-            purl = res.audios[''][0].url;
-            if (purl.indexOf("http") == -1) {
-                purl = "https://slider.kz/" + purl;
-            }
-             return {
-                url: purl,
-              };
-        }
-    }
-    if (domain === "") {
-        domain =
-            result.req_0.data.sip.find((i) => !i.startsWith("http://ws")) ||
-                result.req_0.data.sip[0];
-    }
-    console.log("QQurl:" + `${domain}${purl}`);
-    return {
-        url: `${domain}${purl}`,
-    };
+
+    const mediaId = musicItem.id;
+    let id = musicItem.id;
+    let uin = "";
+    const guid = (Math.random() * 10000000).toFixed(0);
+    const typeObj = typeMap[type];
+    const file = `${typeObj.s}${id}${mediaId}${typeObj.e}`;
+    const url = changeUrlQuery({
+        "-": "getplaysongvkey",
+        g_tk: 5381,
+        loginUin: uin,
+        hostUin: 0,
+        format: "json",
+        inCharset: "utf8",
+        outCharset: "utf-8¬ice=0",
+        platform: "yqq.json",
+        needNewCode: 0,
+        data: JSON.stringify({
+            req_0: {
+                module: "vkey.GetVkeyServer",
+                method: "CgiGetVkey",
+                param: {
+                    filename: [file],
+                    guid: guid,
+                    songmid: [id],
+                    songtype: [0],
+                    uin: uin,
+                    loginflag: 1,
+                    platform: "20",
+                },
+            },
+            comm: {
+                uin: uin,
+                format: "json",
+                ct: 19,
+                cv: 0,
+                authst: "",
+            },
+        }),
+    }, "https://u.y.qq.com/cgi-bin/musicu.fcg");
+    return (await (0, axios_1.default)({
+        method: "GET",
+        url: url,
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
 }
-async function Soapi_mp3(singerName, songName) {
+
+//搜索第三方音源
+async function Thrd_MP3_API(musicItem) {
+
+    return await zz123_mp3(musicItem.artist, musicItem.title);
+    // return await jxcxin_mp3(musicItem.id);
+    // return await hifi_mp3(musicItem.artist, musicItem.title);
+    // return await slider_mp3(musicItem.artist, musicItem.title);
+    // return await free_mp3(musicItem.artist, musicItem.title);
+}
+
+async function zz123_mp3(singerName, songName) {
+    // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
     let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
     let digest43Result = (await axios_1.default.get(so_url)).data;
+    // console.log(digest43Result)
     let sv = digest43Result.indexOf('pageSongArr=');
+    // console.log(sv)
     if (sv != -1) {
         digest43Result = digest43Result.substring(sv + 12);
         let ev = digest43Result.indexOf('];') + 1;
@@ -541,46 +575,9 @@ async function Soapi_mp3(singerName, songName) {
             };
         }
     }
-    return await hifi_mp3(singerName, songName);
 }
-async function hifi_mp3(singerName, songName) {
-    let keyword = encodeURIComponent(singerName + " " + songName);
-    keyword = keyword.replace('-', '_2d');
-    keyword = keyword.replace('%', '_');
-    let so_url = "https://www.hifini.com/search-" + keyword + ".htm";
-    console.log(so_url);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    var pattern = /class="media-body">(.*?)<\/div>/isg;
-    let rsList = digest43Result.match(pattern);
-    let musicUrl;
-    for (const it of rsList) {
-        let vs = it.match(/href="thread(.*?)">(.*?)<\/a>/);
-        let name = vs[0].replace("<em>", "").replace("</em>", "").replace(" ", "").trim();
-        name = name.replace(/<[^>]+>/g, "");
-        if (name.indexOf(singerName) != -1 && name.indexOf(`《${songName}》`)) {
-            let href_url = "https://www.hifini.com/thread" + vs[1];
-            let Result = (await axios_1.default.get(href_url)).data;
-            console.log(href_url);
-            let musicv = Result.match(/get_music.php(.*)'/);
-            console.log(musicv);
-            if (musicv == null) {
-                return {
-                    url: ''
-                };
-            }
-            if (musicv.length > 1 && musicv[1].indexOf('?key') != -1) {
-                musicUrl = "https://www.hifini.com/get_music.php" + musicv[1];
-                return {
-                    url: musicUrl
-                };
-                break;
-            }
-        }
-    }
-    return {
-        url: ''
-    };
-}
+
+
 async function getMusicSheetInfo(sheet, page) {
     const data = await importMusicSheet(sheet.id);
     return {
@@ -615,9 +612,7 @@ module.exports = {
             return await searchMusicSheet(query, page);
         }
     },
-    async getMediaSource(musicItem, quality) {
-        return await getMediaGloSource(musicItem, quality);
-    },
+    getMediaSource,
     getLyric,
     getAlbumInfo,
     getArtistWorks,
