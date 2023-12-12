@@ -21,6 +21,7 @@ function formatMusicItem(_) {
         albummid: albummid,
     };
 }
+
 function formatAlbumItem(_) {
     return {
         id: _.albumID || _.albumid,
@@ -35,6 +36,7 @@ function formatAlbumItem(_) {
         description: _.desc,
     };
 }
+
 function formatArtistItem(_) {
     return {
         name: _.singerName,
@@ -44,6 +46,7 @@ function formatArtistItem(_) {
         worksNum: _.songNum,
     };
 }
+
 const searchTypeMap = {
     0: "song",
     2: "album",
@@ -52,14 +55,17 @@ const searchTypeMap = {
     7: "lyric",
     12: "mv",
 };
+
 const headers = {
     referer: "https://y.qq.com",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
     Cookie: "uin=",
 };
+
 const validSongFilter = (item) => {
     return true;
 };
+
 async function searchBase(query, page, type) {
     const res = (await (0, axios_1.default)({
         url: "https://u.y.qq.com/cgi-bin/musicu.fcg",
@@ -85,6 +91,7 @@ async function searchBase(query, page, type) {
         data: res.req_1.data.body[searchTypeMap[type]].list,
     };
 }
+
 async function searchMusic(query, page) {
     const songs = await searchBase(query, page, 0);
     return {
@@ -92,6 +99,7 @@ async function searchMusic(query, page) {
         data: songs.data.filter(validSongFilter).map(formatMusicItem),
     };
 }
+
 async function searchAlbum(query, page) {
     const albums = await searchBase(query, page, 2);
     return {
@@ -99,6 +107,7 @@ async function searchAlbum(query, page) {
         data: albums.data.map(formatAlbumItem),
     };
 }
+
 async function searchArtist(query, page) {
     const artists = await searchBase(query, page, 1);
     return {
@@ -106,6 +115,7 @@ async function searchArtist(query, page) {
         data: artists.data.map(formatArtistItem),
     };
 }
+
 async function searchMusicSheet(query, page) {
     const musicSheet = await searchBase(query, page, 3);
     return {
@@ -122,6 +132,7 @@ async function searchMusicSheet(query, page) {
         })),
     };
 }
+
 function getQueryFromUrl(key, search) {
     try {
         const sArr = search.split("?");
@@ -144,6 +155,7 @@ function getQueryFromUrl(key, search) {
         return key ? "" : {};
     }
 }
+
 function changeUrlQuery(obj, baseUrl) {
     const query = getQueryFromUrl(null, baseUrl);
     let url = baseUrl.split("?")[0];
@@ -156,6 +168,7 @@ function changeUrlQuery(obj, baseUrl) {
     });
     return `${url}?${queryArr.join("&")}`.replace(/\?$/, "");
 }
+
 const typeMap = {
     m4a: {
         s: "C400",
@@ -178,8 +191,294 @@ const typeMap = {
         e: ".flac",
     },
 };
-async function getSourceUrl(id, type = "128") {
-    const mediaId = id;
+
+async function getAlbumInfo(albumItem) {
+    const url = changeUrlQuery({
+        data: JSON.stringify({
+            comm: {
+                ct: 24,
+                cv: 10000,
+            },
+            albumSonglist: {
+                method: "GetAlbumSongList",
+                param: {
+                    albumMid: albumItem.albumMID,
+                    albumID: 0,
+                    begin: 0,
+                    num: 999,
+                    order: 2,
+                },
+                module: "music.musichallAlbum.AlbumSongList",
+            },
+        }),
+    }, "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&format=json&inCharset=utf8&outCharset=utf-8");
+    const res = (await (0, axios_1.default)({
+        url: url,
+        headers: headers,
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    return {
+        musicList: res.albumSonglist.data.songList
+            .filter((_) => validSongFilter(_.songInfo))
+            .map((item) => {
+            const _ = item.songInfo;
+            return formatMusicItem(_);
+        }),
+    };
+}
+
+async function getArtistSongs(artistItem, page) {
+    const url = changeUrlQuery({
+        data: JSON.stringify({
+            comm: {
+                ct: 24,
+                cv: 0,
+            },
+            singer: {
+                method: "get_singer_detail_info",
+                param: {
+                    sort: 5,
+                    singermid: artistItem.singerMID,
+                    sin: (page - 1) * pageSize,
+                    num: pageSize,
+                },
+                module: "music.web_singer_info_svr",
+            },
+        }),
+    }, "http://u.y.qq.com/cgi-bin/musicu.fcg");
+    const res = (await (0, axios_1.default)({
+        url: url,
+        method: "get",
+        headers: headers,
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    return {
+        isEnd: res.singer.data.total_song <= page * pageSize,
+        data: res.singer.data.songlist.filter(validSongFilter).map(formatMusicItem),
+    };
+}
+
+async function getArtistAlbums(artistItem, page) {
+    const url = changeUrlQuery({
+        data: JSON.stringify({
+            comm: {
+                ct: 24,
+                cv: 0,
+            },
+            singerAlbum: {
+                method: "get_singer_album",
+                param: {
+                    singermid: artistItem.singerMID,
+                    order: "time",
+                    begin: (page - 1) * pageSize,
+                    num: pageSize / 1,
+                    exstatus: 1,
+                },
+                module: "music.web_singer_info_svr",
+            },
+        }),
+    }, "http://u.y.qq.com/cgi-bin/musicu.fcg");
+    const res = (await (0, axios_1.default)({
+        url,
+        method: "get",
+        headers: headers,
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    return {
+        isEnd: res.singerAlbum.data.total <= page * pageSize,
+        data: res.singerAlbum.data.list.map(formatAlbumItem),
+    };
+}
+
+async function getArtistWorks(artistItem, page, type) {
+    if (type === "music") {
+        return getArtistSongs(artistItem, page);
+    }
+    if (type === "album") {
+        return getArtistAlbums(artistItem, page);
+    }
+}
+
+async function getLyric(musicItem) {
+    const result = (await (0, axios_1.default)({
+        url: `http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=${musicItem.songmid}&pcachetime=${new Date().getTime()}&g_tk=5381&loginUin=0&hostUin=0&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0`,
+        headers: { Referer: "https://y.qq.com", Cookie: "uin=" },
+        method: "get",
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    const res = JSON.parse(result.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, ""));
+    return {
+        rawLrc: CryptoJs.enc.Base64.parse(res.lyric).toString(CryptoJs.enc.Utf8),
+    };
+}
+
+async function importMusicSheet(urlLike) {
+    let id;
+    if (!id) {
+        id = (urlLike.match(/https?:\/\/i\.y\.qq\.com\/n2\/m\/share\/details\/taoge\.html\?.*id=([0-9]+)/) || [])[1];
+    }
+    if (!id) {
+        id = (urlLike.match(/https?:\/\/y\.qq\.com\/n\/ryqq\/playlist\/([0-9]+)/) ||
+            [])[1];
+    }
+    if (!id) {
+        id = (urlLike.match(/^(\d+)$/) || [])[1];
+    }
+    if (!id) {
+        return;
+    }
+    const result = (await (0, axios_1.default)({
+        url: `http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&utf8=1&disstid=${id}&loginUin=0`,
+        headers: { Referer: "https://y.qq.com/n/yqq/playlist", Cookie: "uin=" },
+        method: "get",
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    const res = JSON.parse(result.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, ""));
+    return res.cdlist[0].songlist.filter(validSongFilter).map(formatMusicItem);
+}
+
+async function getTopLists() {
+    const list = await (0, axios_1.default)({
+        url: "https://u.y.qq.com/cgi-bin/musicu.fcg?_=1577086820633&data=%7B%22comm%22%3A%7B%22g_tk%22%3A5381%2C%22uin%22%3A123456%2C%22format%22%3A%22json%22%2C%22inCharset%22%3A%22utf-8%22%2C%22outCharset%22%3A%22utf-8%22%2C%22notice%22%3A0%2C%22platform%22%3A%22h5%22%2C%22needNewCode%22%3A1%2C%22ct%22%3A23%2C%22cv%22%3A0%7D%2C%22topList%22%3A%7B%22module%22%3A%22musicToplist.ToplistInfoServer%22%2C%22method%22%3A%22GetAll%22%2C%22param%22%3A%7B%7D%7D%7D",
+        method: "get",
+        headers: {
+            Cookie: "uin=",
+        },
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    });
+    return list.data.topList.data.group.map((e) => ({
+        title: e.groupName,
+        data: e.toplist.map((_) => ({
+            id: _.topId,
+            description: _.intro,
+            title: _.title,
+            period: _.period,
+            coverImg: _.headPicUrl || _.frontPicUrl,
+        })),
+    }));
+}
+
+async function getTopListDetail(topListItem) {
+    const res = await (0, axios_1.default)({
+        url: `https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&data=%7B%22detail%22%3A%7B%22module%22%3A%22musicToplist.ToplistInfoServer%22%2C%22method%22%3A%22GetDetail%22%2C%22param%22%3A%7B%22topId%22%3A${topListItem.id}%2C%22offset%22%3A0%2C%22num%22%3A100%2C%22period%22%3A%22${topListItem.period ?? ""}%22%7D%7D%2C%22comm%22%3A%7B%22ct%22%3A24%2C%22cv%22%3A0%7D%7D`,
+        method: "get",
+        headers: {
+            Cookie: "uin=",
+        },
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    });
+    return {
+        ...topListItem,
+        musicList: res.data.detail.data.songInfoList
+            .filter(validSongFilter)
+            .map(formatMusicItem),
+    };
+}
+
+async function getRecommendSheetTags() {
+    const res = (await axios_1.default.get("https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_tag_conf.fcg?format=json&inCharset=utf8&outCharset=utf-8", {
+        headers: {
+            referer: "https://y.qq.com/",
+        },
+    })).data.data.categories;
+    const data = res.slice(1).map((_) => ({
+        title: _.categoryGroupName,
+        data: _.items.map((tag) => ({
+            id: tag.categoryId,
+            title: tag.categoryName,
+        })),
+    }));
+    const pinned = [];
+    for (let d of data) {
+        if (d.data.length) {
+            pinned.push(d.data[0]);
+        }
+    }
+    return {
+        pinned,
+        data,
+    };
+}
+
+async function getRecommendSheetsByTag(tag, page) {
+    const pageSize = 20;
+    const rawRes = (await axios_1.default.get("https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg", {
+        headers: {
+            referer: "https://y.qq.com/",
+        },
+        params: {
+            inCharset: "utf8",
+            outCharset: "utf-8",
+            sortId: 5,
+            categoryId: tag?.id || "10000000",
+            sin: pageSize * (page - 1),
+            ein: page * pageSize - 1,
+        },
+    })).data;
+    const res = JSON.parse(rawRes.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, "")).data;
+    const isEnd = res.sum <= page * pageSize;
+    const data = res.list.map((item) => ({
+        id: item.dissid,
+        createTime: item.createTime,
+        title: item.dissname,
+        artwork: item.imgurl,
+        description: item.introduction,
+        playCount: item.listennum,
+        artist: item.creator?.name ?? "",
+    }));
+    return {
+        isEnd,
+        data,
+    };
+}
+
+async function getMediaSource(musicItem, quality) {
+    let purl = "";
+
+    // 从官方获取歌曲信息
+    const result = await Official_MP3_API(musicItem.songmid, quality);
+    if (result.req_0 && result.req_0.data && result.req_0.data.midurlinfo) {
+        purl = result.req_0.data.midurlinfo[0].purl;
+    }
+   
+    // 如果未获取到音源，则从第三方平台获取音源
+    if (!purl) {
+        const url_1 = await Thrd_MP3_API(musicItem);
+        purl = url_1.url;
+    }
+
+    console.log("播放音源：",purl);
+    return {
+        url: purl,
+        // rawLrc: result.lyrics,
+        // artwork: result.img,
+    };
+}
+
+
+// 官方音乐信息，包括歌手、id、歌词、歌手照片等
+async function Official_MP3_API(musicItem, quality = "128"){
+
+    let type = "128";
+    if (quality === "standard") {
+        type = "320";
+    }
+    else if (quality === "high") {
+        type = "m4a";
+    }
+    else if (quality === "super") {
+        type = "flac";
+    }
+
+    const mediaId = musicItem.id;
+    let id = musicItem.id;
     let uin = "";
     const guid = (Math.random() * 10000000).toFixed(0);
     const typeObj = typeMap[type];
@@ -224,312 +523,24 @@ async function getSourceUrl(id, type = "128") {
         withCredentials: true,
     })).data;
 }
-async function getAlbumInfo(albumItem) {
-    const url = changeUrlQuery({
-        data: JSON.stringify({
-            comm: {
-                ct: 24,
-                cv: 10000,
-            },
-            albumSonglist: {
-                method: "GetAlbumSongList",
-                param: {
-                    albumMid: albumItem.albumMID,
-                    albumID: 0,
-                    begin: 0,
-                    num: 999,
-                    order: 2,
-                },
-                module: "music.musichallAlbum.AlbumSongList",
-            },
-        }),
-    }, "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&format=json&inCharset=utf8&outCharset=utf-8");
-    const res = (await (0, axios_1.default)({
-        url: url,
-        headers: headers,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    return {
-        musicList: res.albumSonglist.data.songList
-            .filter((_) => validSongFilter(_.songInfo))
-            .map((item) => {
-            const _ = item.songInfo;
-            return formatMusicItem(_);
-        }),
-    };
+
+//搜索第三方音源
+async function Thrd_MP3_API(musicItem) {
+
+    return await zz123_mp3(musicItem.artist, musicItem.title);
+    // return await jxcxin_mp3(musicItem.id);
+    // return await hifi_mp3(musicItem.artist, musicItem.title);
+    // return await slider_mp3(musicItem.artist, musicItem.title);
+    // return await free_mp3(musicItem.artist, musicItem.title);
 }
-async function getArtistSongs(artistItem, page) {
-    const url = changeUrlQuery({
-        data: JSON.stringify({
-            comm: {
-                ct: 24,
-                cv: 0,
-            },
-            singer: {
-                method: "get_singer_detail_info",
-                param: {
-                    sort: 5,
-                    singermid: artistItem.singerMID,
-                    sin: (page - 1) * pageSize,
-                    num: pageSize,
-                },
-                module: "music.web_singer_info_svr",
-            },
-        }),
-    }, "http://u.y.qq.com/cgi-bin/musicu.fcg");
-    const res = (await (0, axios_1.default)({
-        url: url,
-        method: "get",
-        headers: headers,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    return {
-        isEnd: res.singer.data.total_song <= page * pageSize,
-        data: res.singer.data.songlist.filter(validSongFilter).map(formatMusicItem),
-    };
-}
-async function getArtistAlbums(artistItem, page) {
-    const url = changeUrlQuery({
-        data: JSON.stringify({
-            comm: {
-                ct: 24,
-                cv: 0,
-            },
-            singerAlbum: {
-                method: "get_singer_album",
-                param: {
-                    singermid: artistItem.singerMID,
-                    order: "time",
-                    begin: (page - 1) * pageSize,
-                    num: pageSize / 1,
-                    exstatus: 1,
-                },
-                module: "music.web_singer_info_svr",
-            },
-        }),
-    }, "http://u.y.qq.com/cgi-bin/musicu.fcg");
-    const res = (await (0, axios_1.default)({
-        url,
-        method: "get",
-        headers: headers,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    return {
-        isEnd: res.singerAlbum.data.total <= page * pageSize,
-        data: res.singerAlbum.data.list.map(formatAlbumItem),
-    };
-}
-async function getArtistWorks(artistItem, page, type) {
-    if (type === "music") {
-        return getArtistSongs(artistItem, page);
-    }
-    if (type === "album") {
-        return getArtistAlbums(artistItem, page);
-    }
-}
-async function getLyric(musicItem) {
-    const result = (await (0, axios_1.default)({
-        url: `http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=${musicItem.songmid}&pcachetime=${new Date().getTime()}&g_tk=5381&loginUin=0&hostUin=0&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0`,
-        headers: { Referer: "https://y.qq.com", Cookie: "uin=" },
-        method: "get",
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    const res = JSON.parse(result.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, ""));
-    return {
-        rawLrc: CryptoJs.enc.Base64.parse(res.lyric).toString(CryptoJs.enc.Utf8),
-    };
-}
-async function importMusicSheet(urlLike) {
-    let id;
-    if (!id) {
-        id = (urlLike.match(/https?:\/\/i\.y\.qq\.com\/n2\/m\/share\/details\/taoge\.html\?.*id=([0-9]+)/) || [])[1];
-    }
-    if (!id) {
-        id = (urlLike.match(/https?:\/\/y\.qq\.com\/n\/ryqq\/playlist\/([0-9]+)/) ||
-            [])[1];
-    }
-    if (!id) {
-        id = (urlLike.match(/^(\d+)$/) || [])[1];
-    }
-    if (!id) {
-        return;
-    }
-    const result = (await (0, axios_1.default)({
-        url: `http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&utf8=1&disstid=${id}&loginUin=0`,
-        headers: { Referer: "https://y.qq.com/n/yqq/playlist", Cookie: "uin=" },
-        method: "get",
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    const res = JSON.parse(result.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, ""));
-    return res.cdlist[0].songlist.filter(validSongFilter).map(formatMusicItem);
-}
-async function getTopLists() {
-    const list = await (0, axios_1.default)({
-        url: "https://u.y.qq.com/cgi-bin/musicu.fcg?_=1577086820633&data=%7B%22comm%22%3A%7B%22g_tk%22%3A5381%2C%22uin%22%3A123456%2C%22format%22%3A%22json%22%2C%22inCharset%22%3A%22utf-8%22%2C%22outCharset%22%3A%22utf-8%22%2C%22notice%22%3A0%2C%22platform%22%3A%22h5%22%2C%22needNewCode%22%3A1%2C%22ct%22%3A23%2C%22cv%22%3A0%7D%2C%22topList%22%3A%7B%22module%22%3A%22musicToplist.ToplistInfoServer%22%2C%22method%22%3A%22GetAll%22%2C%22param%22%3A%7B%7D%7D%7D",
-        method: "get",
-        headers: {
-            Cookie: "uin=",
-        },
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    });
-    return list.data.topList.data.group.map((e) => ({
-        title: e.groupName,
-        data: e.toplist.map((_) => ({
-            id: _.topId,
-            description: _.intro,
-            title: _.title,
-            period: _.period,
-            coverImg: _.headPicUrl || _.frontPicUrl,
-        })),
-    }));
-}
-async function getTopListDetail(topListItem) {
-    const res = await (0, axios_1.default)({
-        url: `https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&data=%7B%22detail%22%3A%7B%22module%22%3A%22musicToplist.ToplistInfoServer%22%2C%22method%22%3A%22GetDetail%22%2C%22param%22%3A%7B%22topId%22%3A${topListItem.id}%2C%22offset%22%3A0%2C%22num%22%3A100%2C%22period%22%3A%22${topListItem.period ?? ""}%22%7D%7D%2C%22comm%22%3A%7B%22ct%22%3A24%2C%22cv%22%3A0%7D%7D`,
-        method: "get",
-        headers: {
-            Cookie: "uin=",
-        },
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    });
-    return {
-        ...topListItem,
-        musicList: res.data.detail.data.songInfoList
-            .filter(validSongFilter)
-            .map(formatMusicItem),
-    };
-}
-async function getRecommendSheetTags() {
-    const res = (await axios_1.default.get("https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_tag_conf.fcg?format=json&inCharset=utf8&outCharset=utf-8", {
-        headers: {
-            referer: "https://y.qq.com/",
-        },
-    })).data.data.categories;
-    const data = res.slice(1).map((_) => ({
-        title: _.categoryGroupName,
-        data: _.items.map((tag) => ({
-            id: tag.categoryId,
-            title: tag.categoryName,
-        })),
-    }));
-    const pinned = [];
-    for (let d of data) {
-        if (d.data.length) {
-            pinned.push(d.data[0]);
-        }
-    }
-    return {
-        pinned,
-        data,
-    };
-}
-async function getRecommendSheetsByTag(tag, page) {
-    const pageSize = 20;
-    const rawRes = (await axios_1.default.get("https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg", {
-        headers: {
-            referer: "https://y.qq.com/",
-        },
-        params: {
-            inCharset: "utf8",
-            outCharset: "utf-8",
-            sortId: 5,
-            categoryId: tag?.id || "10000000",
-            sin: pageSize * (page - 1),
-            ein: page * pageSize - 1,
-        },
-    })).data;
-    const res = JSON.parse(rawRes.replace(/callback\(|MusicJsonCallback\(|jsonCallback\(|\)$/g, "")).data;
-    const isEnd = res.sum <= page * pageSize;
-    const data = res.list.map((item) => ({
-        id: item.dissid,
-        createTime: item.createTime,
-        title: item.dissname,
-        artwork: item.imgurl,
-        description: item.introduction,
-        playCount: item.listennum,
-        artist: item.creator?.name ?? "",
-    }));
-    return {
-        isEnd,
-        data,
-    };
-}
-async function getMediaGloSource(musicItem, quality) {
-    let purl = "";
-    let domain = "";
-    let type = "128";
-    if (quality === "standard") {
-        type = "320";
-    }
-    else if (quality === "high") {
-        type = "m4a";
-    }
-    else if (quality === "super") {
-        type = "flac";
-    }
-    const result = await getSourceUrl(musicItem.songmid, type);
-    if (result.req_0 && result.req_0.data && result.req_0.data.midurlinfo) {
-        purl = result.req_0.data.midurlinfo[0].purl;
-    }
-   
-    if (!purl) {
-        let serverUrl = `http://adad23u.appinstall.life/getmp3source/qq/sq/${musicItem.songmid}`;
-        let res = (await (0, axios_1.default)({
-            method: "GET",
-            url: serverUrl,
-            xsrfCookieName: "XSRF-TOKEN",
-            withCredentials: true,
-        })).data;
-        console.log(res);
-        if (res.url.indexOf("http") != -1) {
-            return {
-                url: res.url,
-            };
-        }
-        else {
-            return await Soapi_mp3(musicItem.artist, musicItem.title);
-        }
-    }
-     if (!purl) {
-        let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(musicItem.artist)}-${encodeURIComponent(musicItem.title)}`;
-        console.log(serverUrl);
-        let res = (await (0, axios_1.default)({
-            method: "GET",
-            url: serverUrl,
-            xsrfCookieName: "XSRF-TOKEN",
-            withCredentials: true,
-        })).data;
-        if (res.audios[''].length > 0) {
-            purl = res.audios[''][0].url;
-            if (purl.indexOf("http") == -1) {
-                purl = "https://slider.kz/" + purl;
-            }
-             return {
-                url: purl,
-              };
-        }
-    }
-    if (domain === "") {
-        domain =
-            result.req_0.data.sip.find((i) => !i.startsWith("http://ws")) ||
-                result.req_0.data.sip[0];
-    }
-    console.log("QQurl:" + `${domain}${purl}`);
-    return {
-        url: `${domain}${purl}`,
-    };
-}
-async function Soapi_mp3(singerName, songName) {
+
+async function zz123_mp3(singerName, songName) {
+    // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
     let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
     let digest43Result = (await axios_1.default.get(so_url)).data;
+    // console.log(digest43Result)
     let sv = digest43Result.indexOf('pageSongArr=');
+    // console.log(sv)
     if (sv != -1) {
         digest43Result = digest43Result.substring(sv + 12);
         let ev = digest43Result.indexOf('];') + 1;
@@ -541,46 +552,8 @@ async function Soapi_mp3(singerName, songName) {
             };
         }
     }
-    return await hifi_mp3(singerName, songName);
 }
-async function hifi_mp3(singerName, songName) {
-    let keyword = encodeURIComponent(singerName + " " + songName);
-    keyword = keyword.replace('-', '_2d');
-    keyword = keyword.replace('%', '_');
-    let so_url = "https://www.hifini.com/search-" + keyword + ".htm";
-    console.log(so_url);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    var pattern = /class="media-body">(.*?)<\/div>/isg;
-    let rsList = digest43Result.match(pattern);
-    let musicUrl;
-    for (const it of rsList) {
-        let vs = it.match(/href="thread(.*?)">(.*?)<\/a>/);
-        let name = vs[0].replace("<em>", "").replace("</em>", "").replace(" ", "").trim();
-        name = name.replace(/<[^>]+>/g, "");
-        if (name.indexOf(singerName) != -1 && name.indexOf(`《${songName}》`)) {
-            let href_url = "https://www.hifini.com/thread" + vs[1];
-            let Result = (await axios_1.default.get(href_url)).data;
-            console.log(href_url);
-            let musicv = Result.match(/get_music.php(.*)'/);
-            console.log(musicv);
-            if (musicv == null) {
-                return {
-                    url: ''
-                };
-            }
-            if (musicv.length > 1 && musicv[1].indexOf('?key') != -1) {
-                musicUrl = "https://www.hifini.com/get_music.php" + musicv[1];
-                return {
-                    url: musicUrl
-                };
-                break;
-            }
-        }
-    }
-    return {
-        url: ''
-    };
-}
+
 async function getMusicSheetInfo(sheet, page) {
     const data = await importMusicSheet(sheet.id);
     return {
@@ -588,6 +561,7 @@ async function getMusicSheetInfo(sheet, page) {
         musicList: data,
     };
 }
+
 module.exports = {
     platform: "QQ音乐",
     version: "0.1.10",
@@ -615,9 +589,7 @@ module.exports = {
             return await searchMusicSheet(query, page);
         }
     },
-    async getMediaSource(musicItem, quality) {
-        return await getMediaGloSource(musicItem, quality);
-    },
+    getMediaSource,
     getLyric,
     getAlbumInfo,
     getArtistWorks,

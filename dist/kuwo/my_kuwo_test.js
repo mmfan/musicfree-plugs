@@ -592,8 +592,8 @@ async function getMediaSource(musicItem, quality) {
 
     return {
         url: purl,
-        rawLrc: res.lyrics,
-        artwork: res.img,
+        // rawLrc: res.lyrics,
+        // artwork: res.img,
     };
         
 }
