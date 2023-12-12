@@ -476,7 +476,7 @@ async function importMusicSheet(urlLike) {
 }
 module.exports = {
     platform: "酷狗",
-    version: "0.1.4",
+    version: "1.1.4",
     appVersion: ">0.1.0-alpha.0",
     order: 17,
     // srcUrl: "http://adad23u.appinstall.life/dist/kugou/index.js",

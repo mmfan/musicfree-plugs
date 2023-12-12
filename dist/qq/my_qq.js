@@ -564,7 +564,7 @@ async function getMusicSheetInfo(sheet, page) {
 
 module.exports = {
     platform: "QQ音乐",
-    version: "0.1.10",
+    version: "1.1.10",
     order: 20,
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/qq/my_qq.js",
     cacheControl: "no-cache",
