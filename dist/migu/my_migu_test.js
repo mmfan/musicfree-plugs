@@ -578,7 +578,7 @@ module.exports = {
     },
     primaryKey: ["id", "copyrightId"],
     cacheControl: "no-cache",
-    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/migu/my_migu.js",
+    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/migu/my_migu_test.js",
     getMediaSource,
     async search(query, page, type) {
         if (type === "music") {
