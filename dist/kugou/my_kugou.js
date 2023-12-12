@@ -131,8 +131,35 @@ async function searchMusicSheet(query, page) {
 
 
 async function getMediaSource(musicItem, quality) {
-    let hash;
     let purl = "";
+
+    // 获取官方音乐
+    const res = await Official_MP3_API(musicItem, quality);
+    console.log("音源：", res);
+    
+    //酷狗音源是部分免费（VIP）时，寻找其他音源
+    if(!res.is_free_part)
+    {
+        purl = res.play_url || res.play_backup_url;
+    }
+
+    // 从其他站点搜索音源
+    else {
+        const url_1 = await Thrd_MP3_API(musicItem);
+        purl = url_1.url;
+    };
+
+    console.log("播放音源：",purl);
+    return {
+        url: purl,
+        rawLrc: res.lyrics,
+        artwork: res.img,
+    };
+}
+
+// 官方音乐信息，包括歌手、id、歌词、歌手照片等
+async function Official_MP3_API(musicItem, quality){
+    let hash;
     if (quality === "low") {
         hash = musicItem.id;
     }
@@ -161,39 +188,27 @@ async function getMediaSource(musicItem, quality) {
             _: Date.now(),
         },
     })).data.data;
-    // console.log("音源：",res);
-    
-    //酷狗音源是部分免费（VIP）时，寻找其他音源
-    if(!res.is_free_part)
-    {
-        purl = res.play_url || res.play_backup_url;
 
-    }
-    else {
-        const url_1 = await so_MP3_API(musicItem);
-        purl = url_1.url;
-    };
-    
-    console.log("酷狗播放音源：",purl);
-    return {
-        url: purl,
-        rawLrc: res.lyrics,
-        artwork: res.img,
-    };
+    return res;
 }
 
-async function so_MP3_API(musicItem) {
+//搜索第三方音源
+async function Thrd_MP3_API(musicItem) {
+
     return await zz123_mp3(musicItem.artist, musicItem.title);
     // return await jxcxin_mp3(musicItem.id);
     // return await hifi_mp3(musicItem.artist, musicItem.title);
     // return await slider_mp3(musicItem.artist, musicItem.title);
+    // return await free_mp3(musicItem.artist, musicItem.title);
 }
 
 async function zz123_mp3(singerName, songName) {
     // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
     let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
     let digest43Result = (await axios_1.default.get(so_url)).data;
+    // console.log(digest43Result)
     let sv = digest43Result.indexOf('pageSongArr=');
+    // console.log(sv)
     if (sv != -1) {
         digest43Result = digest43Result.substring(sv + 12);
         let ev = digest43Result.indexOf('];') + 1;
@@ -474,6 +489,9 @@ async function importMusicSheet(urlLike) {
     }
     return musicList;
 }
+
+
+
 module.exports = {
     platform: "酷狗",
     version: "1.1.4",

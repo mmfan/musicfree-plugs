@@ -489,6 +489,7 @@ async function importMusicSheet(urlLike) {
     }
     return musicList;
 }
+
 module.exports = {
     platform: "酷狗",
     version: "0.1.4",
