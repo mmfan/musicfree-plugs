@@ -161,7 +161,7 @@ async function searchMusicSheet(query, page) {
         data: playlists,
     };
 }
-searchMusicSheet("孤勇者", 1);
+
 async function getArtistWorks(artistItem, page, type) {
     const data = {
         csrf_token: "",
@@ -375,14 +375,112 @@ const qualityLevels = {
     high: 'exhigh',
     super: 'lossless'
 };
+
 async function getMediaSource(musicItem, quality) {
+    let purl = "";
+
+    // 从官方获取歌曲信息
+    const result = await Official_MP3_API(musicItem.songmid, quality);
+    if (result.url) {
+        purl = result.url;
+    }
+   
+    // 如果未获取到音源，则从第三方平台获取音源
+    if (!purl) {
+        const url_1 = await Thrd_MP3_API(musicItem);
+        purl = url_1.url;
+    }
+
+    console.log("播放音源：",purl);
+    return {
+        url: purl,
+        // rawLrc: result.lyrics,
+        // artwork: result.img,
+    };
+}
+
+// 官方音乐信息，包括歌手、id、歌词、歌手照片等
+async function Official_MP3_API(musicItem, quality){
+
     if (quality !== 'standard') {
         return;
     }
     return {
         url: `https://music.163.com/song/media/outer/url?id=${musicItem.id}.mp3`,
     };
+
 }
+
+//搜索第三方音源
+async function Thrd_MP3_API(musicItem) {
+
+    let url_ok = "";
+    if(url_ok == "")
+    {
+        const res = await zz123_mp3(musicItem.artist, musicItem.title);
+        if(res.url)
+        {
+            url_ok = res.url;
+        } 
+    }
+
+    if(url_ok == "")
+    {
+        const res = await slider_mp3(musicItem.artist, musicItem.title);
+        if(res.url)
+        {
+            url_ok = res.url;
+        } 
+    }
+    
+    return {
+        url: url_ok,
+    };
+}
+
+async function slider_mp3(singerName, songName) {
+    //从slider.kz获取音源
+    let purl = "";
+    let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(singerName)}-${encodeURIComponent(songName)}`;
+    // console.log(serverUrl);
+    let res = (await (0, axios_1.default)({
+        method: "GET",
+        url: serverUrl,
+        xsrfCookieName: "XSRF-TOKEN",
+        withCredentials: true,
+    })).data;
+    // console.log(res);
+    if (res.audios[''].length > 0) {
+        purl = res.audios[''][0].url;
+        if (purl.indexOf("http") == -1) {
+            purl = "https://slider.kz/" + purl;
+        }
+         return {
+            url: purl,
+          };
+    }
+}
+
+async function zz123_mp3(singerName, songName) {
+    // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
+    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
+    let digest43Result = (await axios_1.default.get(so_url)).data;
+    // console.log(digest43Result)
+    let sv = digest43Result.indexOf('pageSongArr=');
+    // console.log(sv)
+    if (sv != -1) {
+        digest43Result = digest43Result.substring(sv + 12);
+        let ev = digest43Result.indexOf('];') + 1;
+        digest43Result = digest43Result.substring(0, ev);
+        let zz123Result = JSON.parse(digest43Result);
+        if (zz123Result.length > 0) {
+            return {
+                url: zz123Result[0].mp3
+            };
+        }
+    }
+}
+
 const headers = {
     authority: "music.163.com",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36",
