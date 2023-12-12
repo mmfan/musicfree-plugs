@@ -480,7 +480,7 @@ module.exports = {
     appVersion: ">0.1.0-alpha.0",
     order: 17,
     // srcUrl: "http://adad23u.appinstall.life/dist/kugou/index.js",
-    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kugou/suyue_kugou.js",
+    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kugou/my_kugou.js",
     cacheControl: "no-cache",
     primaryKey: ["id", "album_id", "album_audio_id"],
     hints: {

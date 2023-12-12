@@ -1,7 +1,7 @@
 {"plugins":[
-    {"name":"酷狗","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kugou/suyue_kugou.js","version":"0.1.3"},
-    {"name":"酷我","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kuwo/suyue_kuwo.js","version":"0.1.12"},
-    {"name":"QQ音乐","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/qq/suyue_qq.js","version":"0.1.10"},
-    {"name":"网易","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/netease/suyue_netease.js","version":"0.1.2"},
+    {"name":"酷狗","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kugou/my_kugou.js","version":"0.1.3"},
+    {"name":"酷我","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kuwo/my_kuwo.js","version":"0.1.12"},
+    {"name":"QQ音乐","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/qq/my_qq.js","version":"0.1.10"},
+    {"name":"网易","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/netease/my_netease.js","version":"0.1.2"},
     {"name":"audiomack","url":"https://gitee.com/maotoumao/MusicFreePlugins/raw/v0.1/dist/audiomack/index.js ","version":"0.1.2"}
 ]}
