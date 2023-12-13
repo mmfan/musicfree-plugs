@@ -590,6 +590,9 @@ async function slider_mp3(singerName, songName) {
             url: purl,
           };
     }
+    return {
+        url: ""
+    };
 }
 
 async function zz123_mp3(singerName, songName) {
@@ -610,6 +613,9 @@ async function zz123_mp3(singerName, songName) {
             };
         }
     }
+    return {
+        url: ""
+    };
 }
 
 async function getMediaSource(musicItem, quality) {

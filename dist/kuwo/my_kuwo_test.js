@@ -590,6 +590,10 @@ async function slider_mp3(singerName, songName) {
             url: purl,
           };
     }
+    
+    return {
+        url: ""
+    };
 }
 
 async function zz123_mp3(singerName, songName) {
@@ -610,6 +614,9 @@ async function zz123_mp3(singerName, songName) {
             };
         }
     }
+    return {
+        url: ""
+    };
 }
 
 async function getMediaSource(musicItem, quality) {
@@ -695,4 +702,32 @@ module.exports = {
     getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
-//getMediaSourceUNION({ id: '34362172' }, "high").then(f => console.log(f));
+
+
+// searchMusic("告白气球", 1);
+
+const item =
+{
+    id: '7149583',
+    artwork: 'https://img4.kuwo.cn/star/albumcover/256/64/39/3540704654.jpg',
+    title: '告白气球',
+    artist: '周杰伦',
+    album: '周杰伦的床边故事',
+    albumId: '555949',
+    artistId: '336',
+    formats: 'aac|mp3|flac'
+  }
+
+  const item1 =
+  {
+    id: '28766340',
+    artwork: 'https://img4.kuwo.cn/star/albumcover/256/92/66/3592884622.jpg',
+    title: '告白气球',
+    artist: '周传雄',
+    album: '蒙面唱将猜猜猜第二季 第4期',
+    albumId: '4036941',
+    artistId: '2',
+    formats: 'aac|mp3|flac'
+  }
+
+  getMediaSource(item, "mp3").then(console.log)
