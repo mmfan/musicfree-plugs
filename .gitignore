@@ -2,3 +2,5 @@ node_modules
 temp
 debug/
 .vscode/launch.json
+example/freesound.js
+搜索结果/
