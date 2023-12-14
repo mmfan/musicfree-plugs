@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const CryptoJs = require("crypto-js");
-
 const pageSize = 20;
 function formatMusicItem(_) {
     const albumid = _.albumid || _.album?.id;
@@ -569,6 +568,9 @@ async function zz123_mp3(singerName, songName) {
             };
         }
     }
+    return {
+        url: ""
+    };
 }
 
 async function slider_mp3(singerName, songName) {
@@ -592,6 +594,9 @@ async function slider_mp3(singerName, songName) {
             url: purl,
           };
     }
+    return {
+        url: ""
+    };
 }
 
 async function getMusicSheetInfo(sheet, page) {
@@ -604,9 +609,9 @@ async function getMusicSheetInfo(sheet, page) {
 
 module.exports = {
     platform: "QQ音乐",
-    version: "1.1.10",
+    version: "0.1.10",
     order: 20,
-    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/qq/my_qq.js",
+    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/qq/my_qq_test.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [
