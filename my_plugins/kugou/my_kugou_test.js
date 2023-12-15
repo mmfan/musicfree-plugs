@@ -2,6 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const cheerio_1 = require("cheerio");
+const third_api = require("../third_party_API.js")//自定义第三方音源
+
+
+
 const pageSize = 20;
 const validMusicFilter = (_) => _.privilege === 0 || _.privilege === 8;
 function formatMusicItem(_) {
@@ -198,7 +202,7 @@ async function Thrd_MP3_API(musicItem) {
     let url_ok = "";
     if(url_ok == "")
     {
-        const res = await zz123_mp3(musicItem.artist, musicItem.title);
+        const res = await third_api.zz123_mp3(musicItem.artist, musicItem.title);
         if(res.url)
         {
             url_ok = res.url;
@@ -207,7 +211,7 @@ async function Thrd_MP3_API(musicItem) {
 
     if(url_ok == "")
     {
-        const res = await slider_mp3(musicItem.artist, musicItem.title);
+        const res = await third_api.slider_mp3(musicItem.artist, musicItem.title);
         if(res.url)
         {
             url_ok = res.url;
@@ -218,121 +222,6 @@ async function Thrd_MP3_API(musicItem) {
         url: url_ok,
     };
 }
-
-async function zz123_mp3(singerName, songName) {
-    // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
-    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    // console.log(digest43Result)
-    let sv = digest43Result.indexOf('pageSongArr=');
-    // console.log(sv)
-    if (sv != -1) {
-        digest43Result = digest43Result.substring(sv + 12);
-        let ev = digest43Result.indexOf('];') + 1;
-        digest43Result = digest43Result.substring(0, ev);
-        let zz123Result = JSON.parse(digest43Result);
-        if (zz123Result.length > 0) {
-            return {
-                url: zz123Result[0].mp3
-            };
-        }
-    }
-    return {
-        url: ""
-    };
-}
-
-
-async function jxcxin_mp3(musicId) {
-    //从 apis.jxcxin.cn获取音源。经过测试，该站点无发获取VIP音源
-    const desUrl = `https://apis.jxcxin.cn/api/kugou?id=${musicId}`;
-    const servercontent = (await (0, axios_1.default)({
-        url: desUrl,
-        method: 'get',
-        timeout: 1000,
-    })).data;
-    console.log(servercontent);
-    if (servercontent.code == 200) {
-        let res_url = servercontent.data.url
-        return 
-        {
-            url: servercontent.data.url
-        };
-    }
-    else {
-        return {
-            url:''
-        };
-    }
-
-}
-
-async function slider_mp3(singerName, songName) {
-    //从slider.kz获取音源
-    let purl = "";
-    let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(singerName)}-${encodeURIComponent(songName)}`;
-    // console.log(serverUrl);
-    let res = (await (0, axios_1.default)({
-        method: "GET",
-        url: serverUrl,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    // console.log(res);
-    if (res.audios[''].length > 0) {
-        purl = res.audios[''][0].url;
-        if (purl.indexOf("http") == -1) {
-            purl = "https://slider.kz/" + purl;
-        }
-         return {
-            url: purl,
-          };
-    }
-    return {
-        url: ""
-    };
-}
-
-async function hifi_mp3(singerName, songName) {
-    let keyword = encodeURIComponent(singerName + " " + songName);
-    keyword = keyword.replace('-', '_2d');
-    keyword = keyword.replace('%', '_');
-    let so_url = "https://www.hifini.com/search-" + keyword + ".htm";
-    console.log(so_url);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    var pattern = /class="media-body">(.*?)<\/div>/isg;
-    let rsList = digest43Result.match(pattern);
-    let musicUrl;
-    for (const it of rsList) {
-        let vs = it.match(/href="thread(.*?)">(.*?)<\/a>/);
-        let name = vs[0].replace("<em>", "").replace("</em>", "").replace(" ", "").trim();
-        name = name.replace(/<[^>]+>/g, "");
-        if (name.indexOf(singerName) != -1 && name.indexOf(`《${songName}》`)) {
-            let href_url = "https://www.hifini.com/thread" + vs[1];
-            let Result = (await axios_1.default.get(href_url)).data;
-            console.log(href_url);
-            let musicv = Result.match(/get_music.php(.*)'/);
-            console.log(musicv);
-            if (musicv == null) {
-                return {
-                    url: ''
-                };
-            }
-            if (musicv.length > 1 && musicv[1].indexOf('?key') != -1) {
-                musicUrl = "https://www.hifini.com/get_music.php" + musicv[1];
-                return {
-                    url: musicUrl
-                };
-                break;
-            }
-        }
-    }
-    return {
-        url: ''
-    };
-}
-
-
 
 
 async function getTopLists() {

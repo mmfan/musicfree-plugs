@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const he = require("he");
+const third_api = require("../third_party_API.js")//自定义第三方音源
+
+
+
+
+
 const pageSize = 30;
 function artworkShort2Long(albumpicShort) {
     const firstSlashOfAlbum = albumpicShort?.indexOf("/") ?? -1;
@@ -108,27 +114,7 @@ async function searchMusic(query, page) {
     };
 }
 
-async function searchMusic2(query, page) {
-    let url = `http://wapi.kuwo.cn/api/www/search/searchMusicBykeyWord?key=${encodeURIComponent(query)}&prefix=&pn=${page}&rn=${pageSize}`;
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: url,
-    })).data;
-    let total = parseInt(res.data.total);
-    let totalpage = total / pageSize + (total % pageSize > 0 ? 1 : 0);
-    totalpage = parseInt(totalpage.toString());
-    let isEnd = false;
-    if (page >= totalpage) {
-        isEnd = true;
-    }
-    const songs = res.data.list
-        // .filter(musicListFilter)
-        .map(formatMusicItemApp);
-    return {
-        isEnd: isEnd,
-        data: songs,
-    };
-}
+
 
 async function searchAlbum(query, page) {
     const res = (await (0, axios_1.default)({
@@ -548,7 +534,7 @@ async function Thrd_MP3_API(musicItem) {
     let url_ok = "";
     if(url_ok == "")
     {
-        const res = await zz123_mp3(musicItem.artist, musicItem.title);
+        const res = await third_api.zz123_mp3(musicItem.artist, musicItem.title);
         if(res.url)
         {
             url_ok = res.url;
@@ -557,7 +543,7 @@ async function Thrd_MP3_API(musicItem) {
 
     if(url_ok == "")
     {
-        const res = await slider_mp3(musicItem.artist, musicItem.title);
+        const res = await third_api.slider_mp3(musicItem.artist, musicItem.title);
         if(res.url)
         {
             url_ok = res.url;
@@ -569,55 +555,6 @@ async function Thrd_MP3_API(musicItem) {
     };
 }
 
-async function slider_mp3(singerName, songName) {
-    //从slider.kz获取音源
-    let purl = "";
-    let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(singerName)}-${encodeURIComponent(songName)}`;
-    // console.log(serverUrl);
-    let res = (await (0, axios_1.default)({
-        method: "GET",
-        url: serverUrl,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    // console.log(res);
-    if (res.audios[''].length > 0) {
-        purl = res.audios[''][0].url;
-        if (purl.indexOf("http") == -1) {
-            purl = "https://slider.kz/" + purl;
-        }
-         return {
-            url: purl,
-          };
-    }
-
-    return {
-        url: ""
-    };
-}
-
-async function zz123_mp3(singerName, songName) {
-    // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
-    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    let sv = digest43Result.indexOf('pageSongArr=');
-    // console.log(sv)
-    if (sv != -1) {
-        digest43Result = digest43Result.substring(sv + 12);
-        let ev = digest43Result.indexOf('];') + 1;
-        digest43Result = digest43Result.substring(0, ev);
-        let zz123Result = JSON.parse(digest43Result);
-        if (zz123Result.length > 0) {
-            console.log("zz123", zz123Result[0].mp3)
-            return {
-                url: zz123Result[0].mp3
-            };
-        }
-    }
-    return {
-        url: ""
-    };
-}
 
 async function getMediaSource(musicItem, quality) {
     console.log('查询',musicItem);

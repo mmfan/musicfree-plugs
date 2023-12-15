@@ -3,6 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const cheerio_1 = require("cheerio");
 const CryptoJS = require("crypto-js");
+const third_api = require("../third_party_API.js")//自定义第三方音源
+
+
+
 const searchRows = 20;
 async function searchBase(query, page, type) {
     const headers = {
@@ -579,7 +583,8 @@ module.exports = {
     primaryKey: ["id", "copyrightId"],
     cacheControl: "no-cache",
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/migu/my_migu_test.js",
-    getMediaSource,
+
+
     async search(query, page, type) {
         if (type === "music") {
             return await searchMusic(query, page);
@@ -639,6 +644,7 @@ module.exports = {
             })),
         };
     },
+    getMediaSource,
     getArtistWorks: getArtistWorks,
     getLyric: getLyric,
     importMusicSheet,

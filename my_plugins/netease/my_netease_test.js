@@ -6,6 +6,11 @@ const qs = require("qs");
 const bigInt = require("big-integer");
 const dayjs = require("dayjs");
 const cheerio = require("cheerio");
+const third_api = require("../third_party_API.js")//自定义第三方音源
+
+
+
+
 function a() {
     var d, e, b = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", c = "";
     for (d = 0; 16 > d; d += 1)
@@ -417,7 +422,7 @@ async function Thrd_MP3_API(musicItem) {
     let url_ok = "";
     if(url_ok == "")
     {
-        const res = await zz123_mp3(musicItem.artist, musicItem.title);
+        const res = await third_api.zz123_mp3(musicItem.artist, musicItem.title);
         if(res.url)
         {
             url_ok = res.url;
@@ -426,7 +431,7 @@ async function Thrd_MP3_API(musicItem) {
 
     if(url_ok == "")
     {
-        const res = await slider_mp3(musicItem.artist, musicItem.title);
+        const res = await third_api.slider_mp3(musicItem.artist, musicItem.title);
         if(res.url)
         {
             url_ok = res.url;
@@ -438,54 +443,6 @@ async function Thrd_MP3_API(musicItem) {
     };
 }
 
-async function slider_mp3(singerName, songName) {
-    //从slider.kz获取音源
-    let purl = "";
-    let serverUrl = `https://slider.kz/vk_auth.php?q=${encodeURIComponent(singerName)}-${encodeURIComponent(songName)}`;
-    // console.log(serverUrl);
-    let res = (await (0, axios_1.default)({
-        method: "GET",
-        url: serverUrl,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-    // console.log(res);
-    if (res.audios[''].length > 0) {
-        purl = res.audios[''][0].url;
-        if (purl.indexOf("http") == -1) {
-            purl = "https://slider.kz/" + purl;
-        }
-         return {
-            url: purl,
-          };
-    }
-    return {
-        url: ""
-    };
-}
-
-async function zz123_mp3(singerName, songName) {
-    // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
-    let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
-    let digest43Result = (await axios_1.default.get(so_url)).data;
-    // console.log(digest43Result)
-    let sv = digest43Result.indexOf('pageSongArr=');
-    // console.log(sv)
-    if (sv != -1) {
-        digest43Result = digest43Result.substring(sv + 12);
-        let ev = digest43Result.indexOf('];') + 1;
-        digest43Result = digest43Result.substring(0, ev);
-        let zz123Result = JSON.parse(digest43Result);
-        if (zz123Result.length > 0) {
-            return {
-                url: zz123Result[0].mp3
-            };
-        }
-    }
-    return {
-        url: ""
-    };
-}
 
 const headers = {
     authority: "music.163.com",
