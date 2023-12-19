@@ -50,13 +50,20 @@ exports.slider_mp3 = function (singerName, songName) {
 
 
 // http://www.2t58.com/so/%E5%91%A8%E6%9D%B0%E4%BC%A6%20%E6%99%B4%E5%A4%A9.html
+// 晴天 周杰伦。音源：https://sy-sycdn.kuwo.cn/393a1bd92c9e6dc1eb47e0340bae6bd5/657bfa05/resource/n2/70/55/756351052.mp3
 // %E5%91%A8%E6%9D%B0%E4%BC%A6%20%E6%99%B4%E5%A4%A9
 exports._2t58_mp3 = async function (singerName, songName) {
-    // 从 2t58.com搜索音源。经过测试，该站点可以搜索VIP音乐
-    let so_url = `http://www.2t58.com/so/${encodeURIComponent(singerName)}%20${encodeURIComponent(songName)}.html`;
+    // 从 2t58.com搜索音源。未成功
+    // let so_url = `http://www.2t58.com/so/${encodeURIComponent(singerName)}%20${encodeURIComponent(songName)}.html`;
+    const headers = {
 
-    let site_Result = (await axios_1.default.get(so_url)).data;
-    // console.log(site_Result)
+    };
+    const params = {
+
+    };
+    let so_url = "http://www.2t58.com/song/bnd4c3ZoZA.html"
+    let site_Result = (await axios_1.default.get(so_url,{ headers, params })).data;
+    console.log(site_Result)
     let sv = site_Result.indexOf('<div class="name"><a href="');
     // console.log(sv)
     if (sv != -1) {
@@ -89,7 +96,7 @@ exports._2t58_mp3 = async function (singerName, songName) {
 
 // http://www.86109.com/so.php?wd=%E5%91%A8%E6%9D%B0%E4%BC%A6+%E6%99%B4%E5%A4%A9
 exports._86109_mp3 = async function (singerName, songName) {
-    // 86109.com搜索音源。
+    // 86109.com搜索音源。未成功
     let  so_url = `http://www.86109.com/so.php?wd=${encodeURIComponent(singerName)}+${encodeURIComponent(songName)}`;
     let search_res = (await axios_1.default.get(so_url)).data;
     // console.log(search_res)
@@ -103,7 +110,7 @@ exports._86109_mp3 = async function (singerName, songName) {
         if(mp3_id)
         {
             let req_url = 'https://api.44h4.com/mgmp3/'+ mp3_id+'.mp3'
-            // console.log(req_url)
+            console.log(req_url)
 
             return {
                 url: req_url
@@ -198,8 +205,37 @@ exports.jxcxin_kw_api = async function (musicId) {
         return "";
 }
 
+exports.ihaoge_mp3 = async function (musicItem) {
+    // ihaoge.com搜索音源。暂未成功获取音源
+    const headers = {};
+    const params = {};
+    let so_url = "https://www.ihaoge.net/tool/song/?song=" + "281472652";
+    let raw_res = (await axios_1.get(so_url, { headers, params })).data;
+    // let raw_res = (await axios_1.default.get(so_url)).data;
+    console.log(raw_res)
+    let sv = raw_res.indexOf('pageSongArr=');
+    // console.log(sv)
+    if (sv != -1) {
+        raw_res = raw_res.substring(sv + 12);
+        let ev = raw_res.indexOf('];') + 1;
+        raw_res = raw_res.substring(0, ev);
+        let zz123Result = JSON.parse(raw_res);
+        if (zz123Result.length > 0) {
+            return {
+                url: zz123Result[0].mp3
+            };
+        }
+    }
+}
+
+
+
+
+
+
+
 // 以下内容用于调试
-const debug = 0
+const debug = 1
 if(debug)
 {
     const musicItem = {
@@ -238,14 +274,26 @@ if(debug)
         albummid: '004fXSyj3bWTMN'
     }
 
-    this.zz123_mp3(musicItem.artist, musicItem.title).then(console.log);
+    const kw_item =
+    {
+        id: '7149583',
+        artwork: 'https://img4.kuwo.cn/star/albumcover/256/64/39/3540704654.jpg',
+        title: '告白气球',
+        artist: '周杰伦',
+        album: '周杰伦的床边故事',
+        albumId: '555949',
+        artistId: '336',
+        formats: 'aac|mp3|flac'
+    }
+
+    // this.zz123_mp3(musicItem.artist, musicItem.title).then(console.log);
     // this.slider_mp3(musicItem.artist, musicItem.title).then(console.log);
-    // this._2t58_mp3(musicItem.artist, musicItem.title).then(console.log);
+    this._2t58_mp3(musicItem.artist, musicItem.title).then(console.log);
     // this._86109_mp3(musicItem.artist, musicItem.title).then(console.log);
     // this.jxcxin_kw_api(musicItem.id).then(console.log);
     // this.hifi_mp3(musicItem.artist, musicItem.title).then(console.log);
     // this.adad23u_mp3(musicItem.artist, musicItem.title).then(console.log);
-    
+    // this.ihaoge_mp3(kw_item)
 
 
 
@@ -261,3 +309,6 @@ if(debug)
 
 
 }
+
+
+
