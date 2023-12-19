@@ -2,9 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const CryptoJs = require("crypto-js");
-const third_api = require("../third_party_API.js")//自定义第三方音源
-
-
+let ZZ123Config = {
+    headers: {
+        "Content-Type": "application/json",
+        "Referer": "https://zz123.com/",
+        "User-Agent": "MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"
+    }
+};
 const pageSize = 20;
 function formatMusicItem(_) {
     const albumid = _.albumid || _.album?.id;
@@ -22,6 +26,7 @@ function formatMusicItem(_) {
         lrc: _.lyric || undefined,
         albumid: albumid,
         albummid: albummid,
+        isfree: _.pay.pay_play === 0 || _.pay.payplay === 0
     };
 }
 function formatAlbumItem(_) {
@@ -52,7 +57,7 @@ const searchTypeMap = {
     2: "album",
     1: "singer",
     3: "songlist",
-    7: "lyric",
+    7: "song",
     12: "mv",
 };
 const headers = {
@@ -62,6 +67,7 @@ const headers = {
 };
 const validSongFilter = (item) => {
     return true;
+    return item.pay.pay_play === 0 || item.pay.payplay === 0;
 };
 async function searchBase(query, page, type) {
     const res = (await (0, axios_1.default)({
@@ -113,7 +119,7 @@ async function searchMusicSheet(query, page) {
     const musicSheet = await searchBase(query, page, 3);
     return {
         isEnd: musicSheet.isEnd,
-        data: musicSheet.data.map(item => ({
+        data: musicSheet.data.map((item) => ({
             title: item.dissname,
             createAt: item.createtime,
             description: item.introduction,
@@ -121,7 +127,17 @@ async function searchMusicSheet(query, page) {
             worksNums: item.song_count,
             artwork: item.imgurl,
             id: item.dissid,
-            artist: item.creator.name
+            artist: item.creator.name,
+        })),
+    };
+}
+async function searchLyric(query, page) {
+    const songs = await searchBase(query, page, 7);
+    return {
+        isEnd: songs.isEnd,
+        data: songs.data.map((it) => ({
+            ...formatMusicItem(it),
+            rawLrcTxt: it.content,
         })),
     };
 }
@@ -464,34 +480,16 @@ async function getRecommendSheetsByTag(tag, page) {
         data,
     };
 }
-
-
-async function getMediaSource(musicItem, quality) {
-    let purl = "";
-
-    // 从官方获取歌曲信息
-    // const result = await Official_MP3_API(musicItem.songmid, quality);
-    // if (result.req_0 && result.req_0.data && result.req_0.data.midurlinfo) {
-    //     purl = result.req_0.data.midurlinfo[0].purl;
-    // }
-   
-    // 如果未获取到音源，则从第三方平台获取音源
-    if (!purl) {
-        const url_1 = await Thrd_MP3_API(musicItem);
-        purl = url_1.url;
-    }
-
-    console.log("播放音源：",purl);
+async function getMusicSheetInfo(sheet, page) {
+    const data = await importMusicSheet(sheet.id);
     return {
-        url: purl,
-        // rawLrc: result.lyrics,
-        // artwork: result.img,
+        isEnd: true,
+        musicList: data,
     };
 }
-
-// 官方音乐信息，包括歌手、id、歌词、歌手照片等
-async function Official_MP3_API(musicItem, quality = "128"){
-
+async function getMusicQQ(musicItem, quality) {
+    let purl = "";
+    let domain = "";
     let type = "128";
     if (quality === "standard") {
         type = "320";
@@ -502,103 +500,139 @@ async function Official_MP3_API(musicItem, quality = "128"){
     else if (quality === "super") {
         type = "flac";
     }
-
-    const mediaId = musicItem.id;
-    let id = musicItem.id;
-    let uin = "";
-    const guid = (Math.random() * 10000000).toFixed(0);
-    const typeObj = typeMap[type];
-    const file = `${typeObj.s}${id}${mediaId}${typeObj.e}`;
-    const url = changeUrlQuery({
-        "-": "getplaysongvkey",
-        g_tk: 5381,
-        loginUin: uin,
-        hostUin: 0,
-        format: "json",
-        inCharset: "utf8",
-        outCharset: "utf-8¬ice=0",
-        platform: "yqq.json",
-        needNewCode: 0,
-        data: JSON.stringify({
-            req_0: {
-                module: "vkey.GetVkeyServer",
-                method: "CgiGetVkey",
-                param: {
-                    filename: [file],
-                    guid: guid,
-                    songmid: [id],
-                    songtype: [0],
-                    uin: uin,
-                    loginflag: 1,
-                    platform: "20",
-                },
-            },
-            comm: {
-                uin: uin,
-                format: "json",
-                ct: 19,
-                cv: 0,
-                authst: "",
-            },
-        }),
-    }, "https://u.y.qq.com/cgi-bin/musicu.fcg");
-    return (await (0, axios_1.default)({
-        method: "GET",
-        url: url,
-        xsrfCookieName: "XSRF-TOKEN",
-        withCredentials: true,
-    })).data;
-}
-
-//搜索第三方音源
-async function Thrd_MP3_API(musicItem) {
-
-    let url_ok = "";
-    if(url_ok == "")
-    {
-        const res = await third_api(musicItem.artist, musicItem.title);
-        
-        if(res.url)
-        {
-            url_ok = res.url;
-        } 
+    const result = await getSourceUrl(musicItem.songmid, type);
+    if (result.req_0 && result.req_0.data && result.req_0.data.midurlinfo) {
+        purl = result.req_0.data.midurlinfo[0].purl;
     }
-
-    // if(url_ok == "")
-    // {
-    //     const res = await third_api.slider_mp3(musicItem.artist, musicItem.title);
-    //     if(res.url)
-    //     {
-    //         // url_ok = res.url;
-    //     } 
-    // }
-
-    // if(url_ok == "")
-    // {
-    //     const res = await third_api.hifi_mp3(musicItem.artist, musicItem.title);
-    //     if(res.url)
-    //     {
-    //         // url_ok = res.url;
-    //     } 
-    // }
-    
+    if (!purl) {
+        return null;
+    }
+    if (domain === "") {
+        domain =
+            result.req_0.data.sip.find((i) => !i.startsWith("http://ws")) ||
+                result.req_0.data.sip[0];
+    }
     return {
-        url: url_ok,
+        url: `${domain}${purl}`,
     };
 }
-
-
-async function getMusicSheetInfo(sheet, page) {
-    const data = await importMusicSheet(sheet.id);
-    return {
-        isEnd: true,
-        musicList: data,
-    };
+async function getMusicZZ123(musicItem) {
+    try {
+        let key = musicItem.artist + " - " + musicItem.title;
+        console.log(key);
+        const res = (await (0, axios_1.default)({
+            method: "post",
+            url: `https://zz123.com/ajax/`,
+            headers: ZZ123Config.headers,
+            params: {
+                act: 'search',
+                key: key,
+                page: 1,
+            },
+        })).data;
+        if (res.data.length > 0) {
+            let result = res.data.filter(f => f.sname == musicItem.artist && f.mname == musicItem.title);
+            if (result.length > 0) {
+                const resultMp3 = (await (0, axios_1.default)({
+                    method: "post",
+                    url: `https://zz123.com/ajax/`,
+                    headers: ZZ123Config.headers,
+                    params: {
+                        act: 'songinfo',
+                        id: result[0].id,
+                    },
+                })).data;
+                if (resultMp3.status = 200) {
+                    return {
+                        url: `https://zz123.com${resultMp3.data.mp3}`,
+                    };
+                }
+                else {
+                    return {
+                        url: '',
+                    };
+                }
+            }
+        }
+        return {
+            url: '',
+        };
+    }
+    catch (ex) {
+        return {
+            url: '',
+        };
+    }
+}
+async function getMusicJxcxin(musicItem) {
+    try {
+        let url = `https://y.qq.com/n/ryqq/songDetail/${musicItem.songmid}`;
+        let key = '03ceb30a7ae7160e3fe2224951412ac0';
+        const desUrl = `https://apis.jxcxin.cn/api/qqmusic?url=${url}&type=json&apiKey=${key}`;
+        const servercontent = (await (0, axios_1.default)({
+            url: desUrl,
+            method: 'get',
+            timeout: 3000,
+        })).data;
+        if (servercontent.code == 200) {
+            return { url: servercontent.url };
+        }
+        else {
+            return { url: '' };
+        }
+    }
+    catch (ex) {
+        return { url: '' };
+    }
+}
+async function getMusicFangpi(musicItem) {
+    try {
+        let singerName = musicItem.artist;
+        let songName = musicItem.title;
+        let keyword = encodeURIComponent(singerName + " " + songName);
+        let url = `https://www.fangpi.net/s/${keyword}`;
+        const result = (await (0, axios_1.default)({
+            url: url,
+            method: 'get',
+            timeout: 3000,
+        })).data;
+        var pattern = /class="col-5 col-content">(.*?)<\/a>/isg;
+        let rsList = result.match(pattern);
+        for (const it of rsList) {
+            let idx = it.indexOf('/music/') + 7;
+            let html = it.substring(idx);
+            idx = html.indexOf('"');
+            let id = html.substring(0, idx);
+            let mp3Result = (await (0, axios_1.default)({
+                method: "get",
+                url: `https://www.fangpi.net/api/play_url?id=${id}&json=1`,
+                timeout: 5000,
+            })).data;
+            if (mp3Result.code == 1 && mp3Result.data.url && mp3Result.data.url != '') {
+                return { url: mp3Result.data.url };
+            }
+        }
+        return { url: '' };
+    }
+    catch (ex) {
+        return { url: '' };
+    }
+}
+async function getMusicSource(musicItem, quality) {
+    if (musicItem.isfree) {
+        return await getMusicQQ(musicItem, quality);
+    }
+    else {
+        let result = await getMusicZZ123(musicItem);
+        //result = (result.url == '') ? await getMusicZZ123(musicItem) : result;
+        result = (result.url == '') ? await getMusicFangpi(musicItem) : result;
+        return result;
+    }
 }
 module.exports = {
     platform: "QQ音乐",
-    version: "0.1.10",
-    order: 20,
+    version: "0.2.1",
+    order: 18,
     srcUrl: "http://adad23u.appinstall.life/dist/qq/index.js",
     cacheControl: "no-cache",
     hints: {
@@ -608,6 +642,8 @@ module.exports = {
             "导入时间和歌单大小有关，请耐心等待",
         ],
     },
+    primaryKey: ['id', 'songmid'],
+    supportedSearchType: ["music", "album", "sheet", "artist", "lyric"],
     async search(query, page, type) {
         if (type === "music") {
             return await searchMusic(query, page);
@@ -621,8 +657,13 @@ module.exports = {
         if (type === "sheet") {
             return await searchMusicSheet(query, page);
         }
+        if (type === "lyric") {
+            return await searchLyric(query, page);
+        }
     },
-    getMediaSource,
+    async getMediaSource(musicItem, quality) {
+        return await getMusicSource(musicItem, quality);
+    },
     getLyric,
     getAlbumInfo,
     getArtistWorks,
@@ -633,44 +674,4 @@ module.exports = {
     getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
-
-// searchMusic('晴天', 1).then(console.log);
-
-const item = {
-    id: 97773,
-    songmid: '0039MnYb0qxYhV',
-    title: '晴天',
-    artist: '周杰伦',
-    artwork: 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg',
-    album: '叶惠美',
-    lrc: undefined,
-    albumid: 8220,
-    albummid: '000MkMni19ClKG'
-  };
-
-  const item1 = {
-        id: 215076997,
-        songmid: '0003f6pW1hOLKG',
-        title: '晴天 (钢琴版)',
-        artist: '文武贝',
-        artwork: 'https://y.gtimg.cn/music/photo_new/T002R300x300M000004QXtXm1PWWmu.jpg',
-        album: '文武贝流行钢琴曲',
-        lrc: undefined,
-        albumid: 3866787,
-        albummid: '004QXtXm1PWWmu'
-      };
-
-      const item2 = {
-        id: 244115385,
-        songmid: '004Fs2FP1EvZYc',
-        title: '晴天 (Live)',
-        artist: '周杰伦',
-        artwork: 'https://y.gtimg.cn/music/photo_new/T002R300x300M000004fXSyj3bWTMN.jpg',
-        album: '周杰伦地表最强世界巡回演唱会',
-        lrc: undefined,
-        albumid: 9040723,
-        albummid: '004fXSyj3bWTMN'
-      }
-
-getMediaSource(item, "high");
-
+ 
