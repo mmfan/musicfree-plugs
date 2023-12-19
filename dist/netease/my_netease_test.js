@@ -603,7 +603,7 @@ async function getMusicSheetInfo(sheet, page) {
 
 
 module.exports = {
-    platform: "网易云",
+    platform: "红桃",
     version: "0.1.2",
     appVersion: '>0.1.0-alpha.0',
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/netease/my_netease_test.js",

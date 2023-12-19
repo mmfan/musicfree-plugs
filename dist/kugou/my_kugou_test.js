@@ -515,7 +515,7 @@ async function importMusicSheet(urlLike) {
 }
 
 module.exports = {
-    platform: "酷狗",
+    platform: "蓝莓",
     version: "0.1.4",
     appVersion: ">0.1.0-alpha.0",
     order: 17,
