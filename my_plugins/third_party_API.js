@@ -5,6 +5,22 @@ const cheerio_1 = require("cheerio");
 
 
 
+exports.enable_plugin = async function () {
+    let url ="https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/token"
+    let raw_token = "token_date: 2023-12-20";
+    const api_token = await axios_1.default.get(url);
+    console.log("搜索结果：", api_token.data)
+    if(api_token.data = raw_token)
+    {
+        return true;
+    }
+    return false;
+}
+
+
+
+
+
 exports.zz123_mp3 = async function (singerName, songName) {
     // 从zz123.com搜索音源。经过测试，该站点可以搜索VIP音乐
     let so_url = "https://zz123.com/search/?key=" + encodeURIComponent(singerName + " - " + songName);
