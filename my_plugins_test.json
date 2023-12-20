@@ -2,5 +2,6 @@
     {"name":"蓝莓","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kugou/my_kugou_test.js","version":"0.1.3"},
     {"name":"黄橙","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_kuwo_test.js","version":"0.1.12"},
     {"name":"青提","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/qq/my_qq_test.js","version":"0.1.10"},
-    {"name":"红桃","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/netease/my_netease_test.js","version":"0.1.2"}
+    {"name":"红桃","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/netease/my_netease_test.js","version":"0.1.2"},
+    {"name":"API","url":"https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/third_party_API.js","version":"0.1.2"}
 ]}
