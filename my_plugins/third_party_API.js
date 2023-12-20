@@ -3,14 +3,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const cheerio_1 = require("cheerio");
 
-
+// 第三方接口初始化
+let bool_api_init = false
 
 exports.enable_plugin = async function () {
-    let url ="https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/token"
-    let raw_token = "token_date: 2023-12-20";
-    const api_token = await axios_1.default.get(url);
-    console.log("搜索结果：", api_token.data)
-    if(api_token.data = raw_token)
+
+    if(bool_api_init === false )
+    {
+        let url ="https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/token"
+        let raw_token = "token_date: 2023-12-20";
+        const api_token = await axios_1.default.get(url);
+        console.log("搜索结果：", api_token.data)
+        if(api_token.data = raw_token)
+        {
+            console.log("第三方接口初始化失败")
+            bool_api_init = true;
+        }
+        else
+        {
+            console.log("第三方接口初始化成功")
+            bool_api_init = true;
+        }
+    }
+    if(bool_api_init === true)
     {
         return true;
     }
