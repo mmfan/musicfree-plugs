@@ -2,11 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const he = require("he");
-const third_api = require("../third_party_API.js")//自定义第三方音源
-
-
-
-
 
 const pageSize = 30;
 function artworkShort2Long(albumpicShort) {
@@ -113,8 +108,6 @@ async function searchMusic(query, page) {
         data: songs,
     };
 }
-
-
 
 async function searchAlbum(query, page) {
     const res = (await (0, axios_1.default)({
@@ -531,28 +524,31 @@ async function Official_MP3_API(musicItem, quality) {
 //搜索第三方音源
 async function Thrd_MP3_API(musicItem) {
 
-    let url_ok = "";
-    if(url_ok == "")
-    {
-        const res = await third_api.zz123_mp3(musicItem.artist, musicItem.title);
-        if(res.url)
-        {
-            url_ok = res.url;
-        } 
-    }
-
-    if(url_ok == "")
-    {
-        const res = await third_api.slider_mp3(musicItem.artist, musicItem.title);
-        if(res.url)
-        {
-            url_ok = res.url;
-        } 
-    }
-    
     return {
         url: url_ok,
     };
+}
+
+async function third_1_source(musicItem, quality) {
+    // 2t58.com
+    let br;
+    if (quality === "low") {
+        br = "aac";
+    }
+    else if (quality === "standard") {
+        br = "mp3";
+    }
+    else {
+        br = "flac";
+    }
+    
+    // if (quality !== 'standard') {
+    //     return;
+    // }
+    
+    const res = (await axios_1.default.get(`http://www.2t58.com/so/${musicItem.id}&format=mp3`)).data;
+    return res;
+
 }
 
 
@@ -614,7 +610,9 @@ module.exports = {
             "导入过程中会过滤掉所有VIP/试听/收费音乐，导入时间和歌单大小有关，请耐心等待",
         ],
     },
+
     async search(query, page, type) {
+        console.log("search(query, page, type): ", query, page, type)
         if (type === "music") {
             return await searchMusic(query, page);
         }
@@ -628,6 +626,7 @@ module.exports = {
             return await searchMusicSheet(query, page);
         }
     },
+
     getMediaSource,
     getAlbumInfo,
     getLyric,
