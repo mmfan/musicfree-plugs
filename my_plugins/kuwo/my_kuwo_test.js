@@ -583,6 +583,7 @@ module.exports = {
     },
     supportedSearchType: ["music", "album", "sheet", 'artist'],
     async search(query, page, type) {
+        console.log("search(query, page, type): ", query, page, type)
         if (type === "music") {
             return await searchMusic(query, page);
         }
@@ -611,15 +612,15 @@ module.exports = {
 
 // searchMusic("告白气球").then(console.log)
 
-let musicitem = 
-    {
-      id: '7149583',
-      artwork: 'https://img4.kuwo.cn/star/albumcover/256/64/39/3540704654.jpg',
-      title: '告白气球',
-      artist: '周杰伦',
-      album: '周杰伦的床边故事',
-      albumId: '555949',
-      artistId: '336',
-      formats: undefined
-    }
-getMediaSource(musicitem)
+// let musicitem = 
+//     {
+//       id: '7149583',
+//       artwork: 'https://img4.kuwo.cn/star/albumcover/256/64/39/3540704654.jpg',
+//       title: '告白气球',
+//       artist: '周杰伦',
+//       album: '周杰伦的床边故事',
+//       albumId: '555949',
+//       artistId: '336',
+//       formats: undefined
+//     }
+// getMediaSource(musicitem)
