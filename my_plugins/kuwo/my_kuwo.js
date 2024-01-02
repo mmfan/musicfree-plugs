@@ -491,7 +491,7 @@ async function Official_MP3_API(musicItem, quality) {
 
 async function ai_ting_music_mp3(singerName, songName) {
     // 2t58.com获取音源
-    let search_url = "http://www.2t58.com/so/" + encodeURIComponent(singerName + " " + songName) + ".html";
+    let search_url = "http://www.2t"+"58.com/so/" + encodeURIComponent(singerName + " " + songName) + ".html";
     let search_res = (await axios_1.default.get(search_url)).data;
     // console.log(search_res)
     let index_1 = search_res.indexOf('<div class="name"><a href="/song/');
@@ -502,11 +502,11 @@ async function ai_ting_music_mp3(singerName, songName) {
 
         let header = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Referer": `http://www.2t58.com/song/${music_id}.html`,
+            "Referer": `http://www.2t`+`58.com/song/${music_id}.html`,
         }
         let mp3_Result = (await (0, axios_1.default)({
             method: "post",
-            url: `http://www.2t58.com/js/play.php`,
+            url: `http://www.2t`+`58.com/js/play.php`,
             headers: header,
             data: `id=${music_id}&type=music`,
         })).data;
@@ -529,11 +529,11 @@ async function ai_ting_music_mp3_test(singerName, songName) {
 
         let header = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Referer": `http://www.2t58.com/song/bnd4c3ZoZA.html`,
+            "Referer": `http://www.2t`+`58.com/song/bnd4c3ZoZA.html`,
         }
         let mp3_Result = (await (0, axios_1.default)({
             method: "post",
-            url: `http://www.2t58.com/js/play.php`,
+            url: `http://www.2t`+`58.com/js/play.php`,
             headers: header,
             data: `id=bnd4c3ZoZA&type=music`,
         })).data;
