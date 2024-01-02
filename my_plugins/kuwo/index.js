@@ -75,7 +75,9 @@ async function searchMusic(query, page) {
             pcjson: 1,
         },
     })).data;
-    const songs = res.abslist.filter(musicListFilter).map(formatMusicItem);
+    const songs = res.abslist
+        // .filter(musicListFilter)
+        .map(formatMusicItem);
     return {
         isEnd: (+res.PN + 1) * +res.RN >= +res.TOTAL,
         data: songs,
@@ -169,7 +171,9 @@ async function getArtistMusicWorks(artistItem, page) {
             pcjson: 1,
         },
     })).data;
-    const songs = res.musiclist.filter(musicListFilter).map((_) => {
+    const songs = res.musiclist
+        // .filter(musicListFilter)
+        .map((_) => {
         return {
             id: _.musicrid,
             artwork: artworkShort2Long(_.web_albumpic_short),
@@ -208,7 +212,9 @@ async function getArtistAlbumWorks(artistItem, page) {
             pcjson: 1,
         },
     })).data;
-    const albums = res.albumlist.filter(musicListFilter).map(formatAlbumItem);
+    const albums = res.albumlist
+        // .filter(musicListFilter)
+        .map(formatAlbumItem);
     return {
         isEnd: (+res.pn + 1) * pageSize >= +res.total,
         data: albums,
@@ -256,7 +262,9 @@ async function getAlbumInfo(albumItem) {
             pcjson: 1,
         },
     })).data;
-    const songs = res.musiclist.filter(musicListFilter).map((_) => {
+    const songs = res.musiclist
+        // .filter(musicListFilter)
+        .map((_) => {
         var _a;
         return {
             id: _.id,
@@ -357,7 +365,9 @@ async function importMusicSheet(urlLike) {
             if (isNaN(totalPage)) {
                 totalPage = 1;
             }
-            musicList = musicList.concat(data.musicList.filter(musicListFilter).map((_) => ({
+            musicList = musicList.concat(data.musicList
+                // .filter(musicListFilter)
+                .map((_) => ({
                 id: _.id,
                 title: he.decode(_.name || ""),
                 artist: he.decode(_.artist || ""),
@@ -451,7 +461,9 @@ async function getMusicSheetInfo(sheet, page) {
     const res = await getMusicSheetResponseById(sheet.id, page, pageSize);
     return {
         isEnd: page * pageSize >= res.total,
-        musicList: res.musiclist.filter(musicListFilter).map((_) => ({
+        musicList: res.musiclist
+            // .filter(musicListFilter)
+            .map((_) => ({
             id: _.id,
             title: he.decode(_.name || ""),
             artist: he.decode(_.artist || ""),
@@ -464,7 +476,8 @@ async function getMusicSheetInfo(sheet, page) {
 }
 module.exports = {
     platform: "酷我",
-    version: "0.1.6",
+    author: '猫头猫',
+    version: "0.1.7",
     appVersion: ">0.1.0-alpha.0",
     srcUrl: "https://gitee.com/maotoumao/MusicFreePlugins/raw/v0.1/dist/kuwo/index.js",
     cacheControl: "no-cache",
@@ -509,3 +522,4 @@ module.exports = {
     getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
+

@@ -435,3 +435,5 @@ module.exports = {
     getAlbumInfo,
     importMusicSheet,
 };
+
+searchMusic("告白气球").then(console.log)
