@@ -599,7 +599,7 @@ module.exports = {
     author: 'Vale',
     version: "0.1.7",
     appVersion: ">0.1.0-alpha.0",
-    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_kuwo_test.js",
+    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/share_plugins/orange.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [
