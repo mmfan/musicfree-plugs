@@ -510,7 +510,7 @@ async function ai_ting_music_mp3(singerName, songName) {
             headers: header,
             data: `id=${music_id}&type=music`,
         })).data;
-        // console.log(mp3_Result)
+        console.log("search from third: ",mp3_Result)
 
         if(mp3_Result.url)
         {
