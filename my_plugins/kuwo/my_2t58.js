@@ -286,7 +286,7 @@ module.exports = {
     version: "0.1.14",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
-    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_2t58.js",
+    // srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_2t58.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [],
@@ -304,8 +304,8 @@ module.exports = {
     getLyric,
     getTopLists,
     getTopListDetail,
-    getRecommendSheetTags,
-    getRecommendSheetsByTag,
+    // getRecommendSheetTags,
+    // getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
 
