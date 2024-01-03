@@ -92,12 +92,14 @@ async function searchMusic(query, page) {
 
 async function getLyric(musicItem) {
     // console.log("getLyric:", musicItem)
-    const res = (await (0, axios_1.default)({
+    let res = (await (0, axios_1.default)({
         method: "get",
         url: host+"/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
         timeout: 10000,
     })).data;
-    res = res.split("58.com")[1]    //过滤歌词中的附加信息
+    res = res.replace("44h4", 'AT');  //屏蔽歌词中的网站信息
+    res = res.replace("爱听", 'AT');  
+    res = res.replace("2t58", 'AT'); 
     return {
         rawLrc: res
     };
