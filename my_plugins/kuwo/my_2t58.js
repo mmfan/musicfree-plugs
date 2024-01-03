@@ -2,328 +2,85 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const he = require("he");
+const cheerio_1 = require("cheerio");
+const CryptoJS = require("crypto-js");
+
+const host = "http://ww" + "w.2t" + "58.com"
 
 let search_key_word = ""
 
 const pageSize = 30;
-function artworkShort2Long(albumpicShort) {
-    const firstSlashOfAlbum = albumpicShort?.indexOf("/") ?? -1;
-    return firstSlashOfAlbum !== -1
-        ? `https://img4.kuwo.cn/star/albumcover/256${albumpicShort.slice(firstSlashOfAlbum)}`
-        : undefined;
-}
-
-function musicListFilter(item) {
-    return true;
-}
-
 function formatMusicItem(_) {
+    const albumid = _.albumid || _.album?.id;
+    const albummid = _.albummid || _.album?.mid;
+    const albumname = _.albumname || _.album?.title;
     return {
-        id: _.MUSICRID.replace("MUSIC_", ""),
-        artwork: artworkShort2Long(_.web_albumpic_short),
-        title: he.decode(_.NAME || ""),
-        artist: he.decode(_.ARTIST || ""),
-        album: he.decode(_.ALBUM || ""),
-        albumId: _.ALBUMID,
-        artistId: _.ARTISTID,
-        formats: 'aac|mp3|flac'
+        id: _.id,           // 音乐在2t58的id
+        songmid: undefined, // 音乐在酷我的id
+        title: _.title,
+        artist: _.artist,
+        artwork: undefined,
+        album: albumname,
+        lrc: _.lyric || undefined,
+        albumid: undefined,
+        albummid: undefined,
     };
 }
 
-function formatMusicItemApp(_) {
-    return {
-        id: _.rid,
-        artwork: _.albumpic.replace('/120/', '/240/'),
-        title: he.decode(_.name || ""),
-        artist: he.decode(_.artist || ""),
-        album: he.decode(_.album || ""),
-        albumId: _.albumid,
-        artistId: _.artistid,
-        formats: 'aac|mp3|flac'
-    };
+async function parse_play_list(raw_data) {
+    const $ = cheerio_1.load(raw_data);
+    const raw_play_list = $("div.play_list").find("li");
+    let song_list_arr = [];
+    for(let i=0; i<raw_play_list.length; i++)
+    {
+        const item=$(raw_play_list[i]).find("a");
+        let data_id = $(item[0]).attr("href").match(/\/song\/(.*?).html/)[1]
+        let data_title = $(item[0]).text().split(" - ")[1]
+        let data_artist = $(item[0]).text().split(" - ")[0]
+        song_list_arr.push({
+            id: data_id, 
+            title: data_title, 
+            artist: data_artist
+        })
+    }
+    // console.log("song_list_arr:",song_list_arr)
+    return(song_list_arr)
 }
 
-function formatAlbumItem(_) {
-    return {
-        id: _.albumid,
-        artist: he.decode(_.artist || ""),
-        title: he.decode(_.name || ""),
-        artwork: _.img ?? artworkShort2Long(_.pic),
-        description: he.decode(_.info || ""),
-        date: _.pub,
-        artistId: _.artistid,
-    };
-}
-
-function formatArtistItem(_) {
-    return {
-        id: _.ARTISTID,
-        avatar: _.hts_PICPATH,
-        name: he.decode(_.ARTIST || ""),
-        artistId: _.ARTISTID,
-        description: he.decode(_.desc || ""),
-        worksNum: _.SONGNUM
-    };
-}
-
-function formatMusicSheet(_) {
-    return {
-        id: _.playlistid,
-        title: he.decode(_.name || ""),
-        artist: he.decode(_.nickname || ""),
-        artwork: _.pic,
-        playCount: _.playcnt,
-        description: he.decode(_.intro || ""),
-        worksNum: _.songnum,
-    };
-}
-
-// {
-//     id: '7149583',
-//     artwork: 'https://img4.kuwo.cn/star/albumcover/256/64/39/3540704654.jpg',
-//     title: '告白气球',
-//     artist: '周杰伦',
-//     album: '周杰伦的床边故事',
-//     albumId: '555949',
-//     artistId: '336',
-//     formats: 'aac|mp3|flac'
-//   },
 async function searchMusic(query, page) {
     let key_word = encodeURIComponent(query)
-    let url_serch = "http://www.2t58.com/so/" + key_word + ".html"
-    console.log(url_serch)
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: url_serch,
-        params: {
+    let url_serch = host + "/so/" + key_word + ".html"
+    // console.log(url_serch)
+    let search_res = (await axios_1.default.get(url_serch)).data
+    let song_list = await parse_play_list(search_res)
 
-        },
-        headers:{
+    const songs = song_list.map(formatMusicItem);
 
-        }
-    })).data;
-    console.log("sousuo:", res)
-    // const songs = res.abslist
-    //     // .filter(musicListFilter)
-    //     .map(formatMusicItem);
-    // return {
-    //     isEnd: (+res.PN + 1) * +res.RN >= +res.TOTAL,
-    //     data: songs,
-    // };
-    return ""
-}
-
-async function searchAlbum(query, page) {
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            all: query,
-            ft: "album",
-            itemset: "web_2013",
-            client: "kt",
-            pn: page - 1,
-            rn: pageSize,
-            rformat: "json",
-            encoding: "utf8",
-            pcjson: 1,
-        },
-    })).data;
-    const albums = res.albumlist.map(formatAlbumItem);
     return {
-        isEnd: (+res.PN + 1) * +res.RN >= +res.TOTAL,
-        data: albums,
-    };
-}
-
-async function searchArtist(query, page) {
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            all: query,
-            ft: "artist",
-            itemset: "web_2013",
-            client: "kt",
-            pn: page - 1,
-            rn: pageSize,
-            rformat: "json",
-            encoding: "utf8",
-            pcjson: 1,
-        },
-    })).data;
-    const artists = res.abslist.map(formatArtistItem);
-    return {
-        isEnd: (+res.PN + 1) * +res.RN >= +res.TOTAL,
-        data: artists,
-    };
-}
-
-async function searchMusicSheet(query, page) {
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            all: query,
-            ft: "playlist",
-            itemset: "web_2013",
-            client: "kt",
-            pn: page - 1,
-            rn: pageSize,
-            rformat: "json",
-            encoding: "utf8",
-            pcjson: 1,
-        },
-    })).data;
-    const musicSheets = res.abslist.map(formatMusicSheet);
-    return {
-        isEnd: (+res.PN + 1) * +res.RN >= +res.TOTAL,
-        data: musicSheets,
-    };
-}
-
-async function getArtistMusicWorks(artistItem, page) {
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            pn: page - 1,
-            rn: pageSize,
-            artistid: artistItem.id,
-            stype: "artist2music",
-            sortby: 0,
-            alflac: 1,
-            show_copyright_off: 1,
-            pcmp4: 1,
-            encoding: "utf8",
-            plat: "pc",
-            thost: "search.kuwo.cn",
-            vipver: "MUSIC_9.1.1.2_BCS2",
-            devid: "38668888",
-            newver: 1,
-            pcjson: 1,
-        },
-    })).data;
-    const songs = res.musiclist
-        // .filter(musicListFilter)
-        .map((_) => {
-        return {
-            id: _.musicrid,
-            artwork: artworkShort2Long(_.web_albumpic_short),
-            title: he.decode(_.name || ""),
-            artist: he.decode(_.artist || ""),
-            album: he.decode(_.album || ""),
-            albumId: _.albumid,
-            artistId: _.artistid,
-            formats: _.formats,
-        };
-    });
-    return {
-        isEnd: (+res.pn + 1) * pageSize >= +res.total,
+        isEnd: true,
         data: songs,
     };
 }
 
-async function getArtistAlbumWorks(artistItem, page) {
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            pn: page - 1,
-            rn: pageSize,
-            artistid: artistItem.id,
-            stype: "albumlist",
-            sortby: 1,
-            alflac: 1,
-            show_copyright_off: 1,
-            pcmp4: 1,
-            encoding: "utf8",
-            plat: "pc",
-            thost: "search.kuwo.cn",
-            vipver: "MUSIC_9.1.1.2_BCS2",
-            devid: "38668888",
-            newver: 1,
-            pcjson: 1,
-        },
-    })).data;
-    const albums = res.albumlist
-        // .filter(musicListFilter)
-        .map(formatAlbumItem);
-    return {
-        isEnd: (+res.pn + 1) * pageSize >= +res.total,
-        data: albums,
-    };
-}
-
-async function getArtistWorks(artistItem, page, type) {
-    if (type === "music") {
-        return getArtistMusicWorks(artistItem, page);
-    }
-    else if (type === "album") {
-        return getArtistAlbumWorks(artistItem, page);
-    }
-}
 
 async function getLyric(musicItem) {
     const res = (await (0, axios_1.default)({
         method: "get",
-        url: "http://m.kuwo.cn/newh5/singles/songinfoandlrc",
+        url: "https://api.44" + "h4.com/lc.php?cid=7149583" + musicItem.songmid,
         timeout: 10000,
-        params: {
-            musicId: musicItem.id,
-            httpStatus: 1,
-        },
     })).data;
-    const list = res.data.lrclist;
+    // console.log(res)
     return {
-        rawLrc: list.map((_) => `[${_.time}]${_.lineLyric}`).join("\n"),
+        rawLrc: res,
     };
 }
 
-async function getAlbumInfo(albumItem) {
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: `http://search.kuwo.cn/r.s`,
-        params: {
-            pn: 0,
-            rn: 100,
-            albumid: albumItem.id,
-            stype: "albuminfo",
-            sortby: 0,
-            alflac: 1,
-            show_copyright_off: 1,
-            pcmp4: 1,
-            encoding: "utf8",
-            plat: "pc",
-            thost: "search.kuwo.cn",
-            vipver: "MUSIC_9.1.1.2_BCS2",
-            devid: "38668888",
-            newver: 1,
-            pcjson: 1,
-        },
-    })).data;
-    const songs = res.musiclist
-        // .filter(musicListFilter)
-        .map((_) => {
-        return {
-            id: _.id,
-            artwork: albumItem.artwork ?? res.img,
-            title: he.decode(_.name || ""),
-            artist: he.decode(_.artist || ""),
-            album: he.decode(_.album || ""),
-            albumId: albumItem.id,
-            artistId: _.artistid,
-            formats: _.formats,
-        };
-    });
-    return {
-        musicList: songs,
-    };
-}
 
 async function getTopLists() {
     const result = (await axios_1.default.get("http://wapi.kuwo.cn/api/pc/bang/list")).data
         .child;
+        console.log("111111111111111111111",result)
+        console.log("2222222222222222")
     return result.map((e) => ({
         title: e.disname,
         data: e.child.map((_) => ({
@@ -381,53 +138,6 @@ async function getMusicSheetResponseById(id, page, pagesize = 50) {
             newver: 1,
         },
     })).data;
-}
-
-async function importMusicSheet(urlLike) {
-    let id;
-    if (!id) {
-        id = urlLike.match(/https?:\/\/www\/kuwo\.cn\/playlist_detail\/(\d+)/)?.[1];
-    }
-    if (!id) {
-        id = urlLike.match(/https?:\/\/m\.kuwo\.cn\/h5app\/playlist\/(\d+)/)?.[1];
-    }
-    if (!id) {
-        id = urlLike.match(/^\s*(\d+)\s*$/);
-    }
-    if (!id) {
-        return;
-    }
-    let page = 1;
-    let totalPage = 30;
-    let musicList = [];
-    while (page < totalPage) {
-        try {
-            const data = await getMusicSheetResponseById(id, page, 80);
-            totalPage = Math.ceil(data.total / 80);
-            if (isNaN(totalPage)) {
-                totalPage = 1;
-            }
-            musicList = musicList.concat(data.musicList
-                    // .filter(musicListFilter)
-                    .map((_) => ({
-                id: _.id,
-                title: he.decode(_.name || ""),
-                artist: he.decode(_.artist || ""),
-                album: he.decode(_.album || ""),
-                albumId: _.albumid,
-                artistId: _.artistid,
-                formats: _.formats,
-            })));
-        }
-        catch { }
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve();
-            }, 200 + Math.random() * 100);
-        });
-        ++page;
-    }
-    return musicList;
 }
 
 async function getRecommendSheetTags() {
@@ -504,98 +214,30 @@ async function getRecommendSheetsByTag(tag, page) {
     };
 }
 
-// 从酷我接口获取官方音乐信息
-async function Official_MP3_API(musicItem, quality) {
-    
-    let br;
-    if (quality === "low") {
-        br = "aac";
-    }
-    else if (quality === "standard") {
-        br = "mp3";
-    }
-    else {
-        br = "flac";
-    }
-    
-    // if (quality !== 'standard') {
-    //     return;
-    // }
-    const res = (await axios_1.default.get(`https://antiserver.kuwo.cn/anti.s?type=convert_url3&rid=${musicItem.id}&format=mp3`)).data;
-    return res;
-
-}
-
-//搜索第三方音源
-async function Thrd_MP3_API(musicItem) {
-
-    return {
-        url: url_ok,
-    };
-}
-
-async function third_1_source(musicItem, quality) {
-    // 2t58.com
-
-    
-    let para = {
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Referer": `http://www.2t58.com/song/bW1oc2to.html`,
-        }
-    };
-
-    let mp3Result2 = (await (0, axios_1.default)({
-        method: "post",
-        url: `http://www.2t58.com/js/play.php`,
-        headers: para.headers,
-        data: `id=bW1oc2to&type=music`,
-    })).data;
-    console.log(mp3Result2)
-
-    if (mp3Result2.url != '') {
-        // viewLog(DbResult);
-        console.log(mp3Result2.url)
-        return { url: mp3Result2.url };
-    }
-
-
-
-
-    // const res = (await axios_1.default.get(`http://www.2t58.com/so/${musicItem.id}&format=mp3`)).data;
-    // return res;
-
-
-
-
-
-
-}
-
 
 async function getMediaSource(musicItem, quality) {
-    console.log('查询',musicItem);
-    let purl = "";
-
-    // 从酷我官方查找音源。遇到试听音源时，查找其他音源
-    // const res = await Official_MP3_API(musicItem, quality);
-    const res = ""// 官方源报错，从三方搜索
-    console.log('酷我音源结果：',res);
-
-    if (res && res.url != null && res.url != '') {
-        purl = res.url;
+    // 2t58.com获取音源
+    let header = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Referer": `http://www.2t58.com/song/${musicItem.id}.html`,
     }
-    else
+    let mp3_Result = (await (0, axios_1.default)({
+        method: "post",
+        url: `http://www.2t58.com/js/play.php`,
+        headers: header,
+        data: `id=${musicItem.id}&type=music`,
+    })).data;
+    console.log("search from third: ",mp3_Result)
+
+    if(mp3_Result.url)
     {
-        const res_3rd = await Thrd_MP3_API(musicItem);
-        purl = res_3rd.url;
-    }
-
-    return {
-        url: purl,
-        // rawLrc: res.lyrics,
-        // artwork: res.img,
-    };
+        return {
+            url: mp3_Result.url
+        };
+    } 
+return {
+    url: ""
+};
         
 }
 
@@ -618,7 +260,7 @@ async function getMusicSheetInfo(sheet, page) {
 }
 
 module.exports = {
-    platform: "黄橙",
+    platform: "2t58",
     version: "0.1.13",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
@@ -638,30 +280,31 @@ module.exports = {
         if (type === "music") {
             return await searchMusic(query, page);
         }
-        // if (type === "album") {
-        //     return await searchAlbum(query, page);
-        // }
-        // if (type === "artist") {
-        //     return await searchArtist(query, page);
-        // }
-        // if (type === "sheet") {
-        //     return await searchMusicSheet(query, page);
-        // }
     },
 
     getMediaSource,
-    getAlbumInfo,
     getLyric,
-    getArtistWorks,
     getTopLists,
     getTopListDetail,
-    importMusicSheet,
     getRecommendSheetTags,
     getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
 
-// searchMusic("告白气球")
+// searchMusic("告白气球").then(console.log)
+// getLyric()
+// getTopLists().then(console.log)
+// getRecommendSheetTags()
 
-// third_1_source()
-getRecommendSheetTags()
+let music_item = {
+    id: 'bnd4c3ZoZA',
+    songmid: undefined,
+    title: '告白气球',
+    artist: '周杰伦',
+    artwork: undefined,
+    album: undefined,
+    lrc: undefined,
+    albumid: undefined,
+    albummid: undefined
+  }
+getMediaSource(music_item)
