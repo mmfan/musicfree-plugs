@@ -65,14 +65,14 @@ async function searchMusic(query, page) {
 
 async function getLyric(musicItem) {
     console.log("getLyric:", musicItem)
-    const res = (await (0, axios_1.default)({
-        method: "get",
-        url: "https://api.44" + "h4.com/lc.php?cid=7149583" + musicItem.songmid,
-        timeout: 10000,
-    })).data;
+    // const res = (await (0, axios_1.default)({
+    //     method: "get",
+    //     url: "https://api.44" + "h4.com/lc.php?cid" + musicItem.songmid,
+    //     timeout: 10000,
+    // })).data;
     
     return {
-        rawLrc: res,
+        rawLrc: "http://www.2t58.com/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
     };
 }
 
@@ -263,7 +263,7 @@ async function getMusicSheetInfo(sheet, page) {
 
 module.exports = {
     platform: "2t58",
-    version: "0.1.13",
+    version: "0.1.14",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/dist/kuwo/my_kuwo_test.js",
