@@ -34,9 +34,12 @@ async function parse_play_list_html(raw_data, separator) {
     for(let i=0; i<raw_play_list.length; i++)
     {
         const item=$(raw_play_list[i]).find("a");
+        
         let data_id = $(item[0]).attr("href").match(/\/song\/(.*?).html/)[1]
-        let data_title = $(item[0]).text().split(separator)[1]  // 通过分隔符区分歌手和歌名
-        let data_artist = $(item[0]).text().split(separator)[0]
+        console.log($(item[0]).text())
+        let separated_text = $(item[0]).text().split(separator)
+        let data_artist = separated_text[0] // 通过分隔符区分歌手和歌名
+        let data_title = separated_text[1]!="" ? separated_text[1]:separated_text[2]
         song_list_arr.push({
             id: data_id, 
             title: data_title, 
