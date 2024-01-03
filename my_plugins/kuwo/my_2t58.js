@@ -53,8 +53,8 @@ async function parse_top_list_html(raw_data) {
     const raw_play_list = $("div.ilingku_fl").find("li");
     let top_list_arr = [];
     top_list_arr.push(
-        {id: "/list/new.html", coverImg: undefined, title: "酷我新歌榜", description: undefined},
-        {id: "/list/top.html", coverImg: undefined, title: "酷我飙升榜", description: undefined},)
+        {id: "/list/new.html", coverImg: kw_logo, title: "酷我新歌榜", description: "每日同步官方数据"},
+        {id: "/list/top.html", coverImg: kw_logo, title: "酷我飙升榜", description: "每日同步官方数据"},)
     for(let i=0; i<raw_play_list.length; i++)
     {
         const item=$(raw_play_list[i]).find("a");
@@ -64,7 +64,7 @@ async function parse_top_list_html(raw_data) {
             id: data_address, 
             coverImg: kw_logo,
             title: data_title, 
-            description: undefined
+            description: "每日同步官方数据"
         })
     }
     // console.log("song_list_arr:",song_list_arr)
