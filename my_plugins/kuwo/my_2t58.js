@@ -6,7 +6,6 @@ const cheerio_1 = require("cheerio");
 const CryptoJS = require("crypto-js");
 
 const host = "http://ww" + "w.2t" + "58.com"
-const kw_logo = "https://tiebapic.baidu.com/forum/w%3D120%3Bh%3D120/sign=c152afebeac379317d68822bdbffdf78/2934349b033b5bb570484d1373d3d539b700bc44.jpg?tbpicau=2024-01-05-05_8e8d6cf789aa470e2b7d40e7ad9145c9"
 
 let search_key_word = ""
 
@@ -28,7 +27,7 @@ function formatMusicItem(_) {
     };
 }
 
-async function parse_play_list_html(raw_data) {
+async function parse_play_list_html(raw_data, separator) {
     const $ = cheerio_1.load(raw_data);
     const raw_play_list = $("div.play_list").find("li");
     let song_list_arr = [];
@@ -36,8 +35,8 @@ async function parse_play_list_html(raw_data) {
     {
         const item=$(raw_play_list[i]).find("a");
         let data_id = $(item[0]).attr("href").match(/\/song\/(.*?).html/)[1]
-        let data_title = $(item[0]).text().split(" - ")[1]
-        let data_artist = $(item[0]).text().split(" - ")[0]
+        let data_title = $(item[0]).text().split(separator)[1]  // 通过分隔符区分歌手和歌名
+        let data_artist = $(item[0]).text().split(separator)[0]
         song_list_arr.push({
             id: data_id, 
             title: data_title, 
@@ -53,8 +52,8 @@ async function parse_top_list_html(raw_data) {
     const raw_play_list = $("div.ilingku_fl").find("li");
     let top_list_arr = [];
     top_list_arr.push(
-        {id: "/list/new.html", coverImg: kw_logo, title: "酷我新歌榜", description: "每日同步官方数据"},
-        {id: "/list/top.html", coverImg: kw_logo, title: "酷我飙升榜", description: "每日同步官方数据"},)
+        {id: "/list/new.html", coverImg: undefined, title: "酷我新歌榜", description: "每日同步官方数据"},
+        {id: "/list/top.html", coverImg: undefined, title: "酷我飙升榜", description: "每日同步官方数据"},)
     for(let i=0; i<raw_play_list.length; i++)
     {
         const item=$(raw_play_list[i]).find("a");
@@ -62,7 +61,7 @@ async function parse_top_list_html(raw_data) {
         let data_title = $(item[0]).text()
         top_list_arr.push({
             id: data_address, 
-            coverImg: kw_logo,
+            coverImg: undefined,
             title: data_title, 
             description: "每日同步官方数据"
         })
@@ -77,7 +76,7 @@ async function searchMusic(query, page) {
     let url_serch = host + "/so/" + key_word + ".html"
     // console.log(url_serch)
     let search_res = (await axios_1.default.get(url_serch)).data
-    let song_list = await parse_play_list_html(search_res)
+    let song_list = await parse_play_list_html(search_res, " - ")
 
     const songs = song_list.map(formatMusicItem);
 
@@ -121,36 +120,28 @@ async function getTopLists() {
 }
 
 async function getTopListDetail(topListItem) {
-    const res = await axios_1.default.get(`http://kbangserver.kuwo.cn/ksong.s`, {
-        params: {
-            from: "pc",
-            fmt: "json",
-            pn: 0,
-            rn: 80,
-            type: "bang",
-            data: "content",
-            id: topListItem.id,
-            show_copyright_off: 0,
-            pcmp4: 1,
-            isbang: 1,
-            userid: 0,
-            httpStatus: 1,
-        },
-    });
-    return {
+
+    let url_serch = host + topListItem.id
+    // console.log(url_serch)
+    let search_res = (await axios_1.default.get(url_serch)).data
+    let song_list = await parse_play_list_html(search_res, "_")
+
+
+    let res =  {
         ...topListItem,
-        musicList: res.data.musiclist.map((_) => {
+        musicList: song_list.map((_) => {
             return {
                 id: _.id,
-                title: he.decode(_.name || ""),
-                artist: he.decode(_.artist || ""),
-                album: he.decode(_.album || ""),
-                albumId: _.albumid,
-                artistId: _.artistid,
-                formats: _.formats,
+                title: _.title,
+                artist: _.artist,
+                album: undefined,
+                albumId: undefined,
+                artistId: undefined,
+                formats: undefined,
             };
         }),
     };
+    return res;
 }
 
 async function getMusicSheetResponseById(id, page, pagesize = 50) {
@@ -321,7 +312,7 @@ module.exports = {
 
 // searchMusic("告白气球").then(console.log)
 // getLyric()
-getTopLists().then(console.log)
+// getTopLists().then(console.log)
 // getRecommendSheetTags()
 
 // let music_item = {
@@ -336,3 +327,12 @@ getTopLists().then(console.log)
 //     albummid: undefined
 //   }
 // getMediaSource(music_item)
+
+let top_item={
+    id: "/list/top.html",
+    coverImg: undefined,
+    title: "酷我飙升榜",
+    description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
+}
+
+getTopListDetail(top_item)

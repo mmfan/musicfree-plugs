@@ -293,7 +293,7 @@ async function getTopLists() {
     const result = (await axios_1.default.get("http://wapi.kuwo.cn/api/pc/bang/list")).data
         .child;
 
-        let return1 =  result.map((e) => ({
+    let return1 =  result.map((e) => ({
         title: e.disname,
         data: e.child.map((_) => {
             var _a, _b;
@@ -324,7 +324,9 @@ async function getTopListDetail(topListItem) {
             httpStatus: 1,
         },
     });
-    return Object.assign(Object.assign({}, topListItem), { musicList: res.data.musiclist.map((_) => {
+
+    let res_1 = 
+    Object.assign(Object.assign({}, topListItem), { musicList: res.data.musiclist.map((_) => {
             return {
                 id: _.id,
                 title: he.decode(_.name || ""),
@@ -335,6 +337,7 @@ async function getTopListDetail(topListItem) {
                 formats: _.formats,
             };
         }) });
+    return res_1
 }
 async function getMusicSheetResponseById(id, page, pagesize = 50) {
     return (await axios_1.default.get(`http://nplserver.kuwo.cn/pl.svc`, {
@@ -638,4 +641,13 @@ module.exports = {
     getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
-getTopLists().then(console.log)
+// getTopLists()
+
+let top_item={
+    id: "93",
+    coverImg: "http://img3.kwcdn.kuwo.cn/star/upload/5/5/1704268408_pc.png",
+    title: "酷我飙升榜",
+    description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
+}
+getTopListDetail(top_item)
+
