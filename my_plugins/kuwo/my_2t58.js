@@ -16,7 +16,7 @@ function formatMusicItem(_) {
     const albumname = _.albumname || _.album?.title;
     return {
         id: _.id,           // 音乐在2t58的id
-        songmid: _.lkid || undefined, // 音乐在酷我的id
+        songmid: undefined, // 音乐在酷我的id
         title: _.title,
         artist: _.artist,
         artwork: undefined,
@@ -64,13 +64,13 @@ async function searchMusic(query, page) {
 
 
 async function getLyric(musicItem) {
-    console.log("getLyric:", musicItem)
+    // console.log("getLyric:", musicItem)
     const res = (await (0, axios_1.default)({
         method: "get",
         url: host+"/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
         timeout: 10000,
     })).data;
-    res = res.split("58.com")[1]
+    res = res.split("58.com")[1]    //过滤歌词中的附加信息
     return {
         rawLrc: res
     };
@@ -221,11 +221,11 @@ async function getMediaSource(musicItem, quality) {
     // 2t58.com获取音源
     let header = {
         "Content-Type": "application/x-www-form-urlencoded",
-        "Referer": `http://www.2t58.com/song/${musicItem.id}.html`,
+        "Referer": host+`/song/${musicItem.id}.html`,
     }
     let mp3_Result = (await (0, axios_1.default)({
         method: "post",
-        url: `http://www.2t58.com/js/play.php`,
+        url: host + `/js/play.php`,
         headers: header,
         data: `id=${musicItem.id}&type=music`,
     })).data;
@@ -237,8 +237,8 @@ async function getMediaSource(musicItem, quality) {
             url: mp3_Result.url
         };
     } 
-return {
-    url: ""
+    return {
+        url: ""
 };
         
 }
@@ -262,7 +262,7 @@ async function getMusicSheetInfo(sheet, page) {
 }
 
 module.exports = {
-    platform: "2t58",
+    platform: "AT",
     version: "0.1.14",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
