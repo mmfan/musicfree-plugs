@@ -27,7 +27,7 @@ function formatMusicItem(_) {
     };
 }
 
-async function parse_play_list(raw_data) {
+async function parse_play_list_html(raw_data) {
     const $ = cheerio_1.load(raw_data);
     const raw_play_list = $("div.play_list").find("li");
     let song_list_arr = [];
@@ -47,12 +47,36 @@ async function parse_play_list(raw_data) {
     return(song_list_arr)
 }
 
+async function parse_top_list_html(raw_data) {
+    const $ = cheerio_1.load(raw_data);
+    const raw_play_list = $("div.ilingku_fl").find("li");
+    let top_list_arr = [];
+    top_list_arr.push(
+        {id: "/list/new.html", coverImg: undefined, title: "酷我新歌榜", description: undefined},
+        {id: "/list/top.html", coverImg: undefined, title: "酷我飙升榜", description: undefined},)
+    for(let i=0; i<raw_play_list.length; i++)
+    {
+        const item=$(raw_play_list[i]).find("a");
+        let data_address = $(item[0]).attr("href")
+        let data_title = $(item[0]).text()
+        top_list_arr.push({
+            id: data_address, 
+            coverImg: undefined,
+            title: data_title, 
+            description: undefined
+        })
+    }
+    // console.log("song_list_arr:",song_list_arr)
+    return(top_list_arr)
+    
+}
+
 async function searchMusic(query, page) {
     let key_word = encodeURIComponent(query)
     let url_serch = host + "/so/" + key_word + ".html"
     // console.log(url_serch)
     let search_res = (await axios_1.default.get(url_serch)).data
-    let song_list = await parse_play_list(search_res)
+    let song_list = await parse_play_list_html(search_res)
 
     const songs = song_list.map(formatMusicItem);
 
@@ -78,20 +102,14 @@ async function getLyric(musicItem) {
 
 
 async function getTopLists() {
-    const result = (await axios_1.default.get("http://wapi.kuwo.cn/api/pc/bang/list")).data
-        .child;
-        console.log("111111111111111111111",result)
-        console.log("2222222222222222")
-     result.map((e) => ({
-        title: e.disname,
-        data: e.child.map((_) => ({
-            id: _.sourceid,
-            coverImg: _.pic5 ?? _.pic2 ?? _.pic,
-            title: _.name,
-            description: _.intro,
-        })),
-    }));
-    return result
+
+    const raw_html = (await axios_1.default.get(host + "/list/new.html")).data
+    let toplist = await parse_top_list_html(raw_html)
+
+    return {
+        title: "官方榜单",
+        data: toplist,
+    };
 }
 
 async function getTopListDetail(topListItem) {
