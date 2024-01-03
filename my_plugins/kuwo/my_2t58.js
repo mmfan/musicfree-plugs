@@ -65,14 +65,15 @@ async function searchMusic(query, page) {
 
 async function getLyric(musicItem) {
     console.log("getLyric:", musicItem)
-    // const res = (await (0, axios_1.default)({
-    //     method: "get",
-    //     url: "https://api.44" + "h4.com/lc.php?cid" + musicItem.songmid,
-    //     timeout: 10000,
-    // })).data;
+    const res = (await (0, axios_1.default)({
+        method: "get",
+        url: "https://api.44" + "h4.com/lc.php?cid" + musicItem.songmid,
+        timeout: 10000,
+    })).data;
     
     return {
-        rawLrc: "http://www.2t58.com/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
+        // rawLrc: "http://www.2t58.com/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
+        rawLrc: res
     };
 }
 
