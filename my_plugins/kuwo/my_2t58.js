@@ -107,10 +107,10 @@ async function getTopLists() {
     const raw_html = (await axios_1.default.get(host + "/list/new.html")).data
     let toplist = await parse_top_list_html(raw_html)
 
-    return {
+    return [{
         title: "官方榜单",
-        data: toplist,
-    };
+        data: [toplist],
+    }];
 }
 
 async function getTopListDetail(topListItem) {

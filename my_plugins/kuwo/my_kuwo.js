@@ -636,3 +636,4 @@ module.exports = {
     getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
+getTopLists().then(console.log)
