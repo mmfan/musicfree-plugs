@@ -70,7 +70,7 @@ async function getLyric(musicItem) {
         url: host+"/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
         timeout: 10000,
     })).data;
-    
+    res = res.split("58.com")[1]
     return {
         rawLrc: res
     };
