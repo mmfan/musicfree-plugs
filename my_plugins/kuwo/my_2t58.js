@@ -64,12 +64,13 @@ async function searchMusic(query, page) {
 
 
 async function getLyric(musicItem) {
+    console.log("getLyric:", musicItem)
     const res = (await (0, axios_1.default)({
         method: "get",
         url: "https://api.44" + "h4.com/lc.php?cid=7149583" + musicItem.songmid,
         timeout: 10000,
     })).data;
-    // console.log(res)
+    
     return {
         rawLrc: res,
     };
@@ -81,7 +82,7 @@ async function getTopLists() {
         .child;
         console.log("111111111111111111111",result)
         console.log("2222222222222222")
-    return result.map((e) => ({
+     result.map((e) => ({
         title: e.disname,
         data: e.child.map((_) => ({
             id: _.sourceid,
@@ -90,6 +91,7 @@ async function getTopLists() {
             description: _.intro,
         })),
     }));
+    return result
 }
 
 async function getTopListDetail(topListItem) {
@@ -293,18 +295,18 @@ module.exports = {
 
 // searchMusic("告白气球").then(console.log)
 // getLyric()
-// getTopLists().then(console.log)
+getTopLists().then(console.log)
 // getRecommendSheetTags()
 
-let music_item = {
-    id: 'bnd4c3ZoZA',
-    songmid: undefined,
-    title: '告白气球',
-    artist: '周杰伦',
-    artwork: undefined,
-    album: undefined,
-    lrc: undefined,
-    albumid: undefined,
-    albummid: undefined
-  }
-getMediaSource(music_item)
+// let music_item = {
+//     id: 'bnd4c3ZoZA',
+//     songmid: undefined,
+//     title: '告白气球',
+//     artist: '周杰伦',
+//     artwork: undefined,
+//     album: undefined,
+//     lrc: undefined,
+//     albumid: undefined,
+//     albummid: undefined
+//   }
+// getMediaSource(music_item)
