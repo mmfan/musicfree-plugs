@@ -36,7 +36,7 @@ async function parse_play_list_html(raw_data, separator) {
         const item=$(raw_play_list[i]).find("a");
         
         let data_id = $(item[0]).attr("href").match(/\/song\/(.*?).html/)[1]
-        console.log($(item[0]).text())
+        // console.log($(item[0]).text())
         let separated_text = $(item[0]).text().split(separator)
         let data_artist = separated_text[0] // 通过分隔符区分歌手和歌名
         let data_title = separated_text[1]!="" ? separated_text[1]:separated_text[2]
@@ -164,7 +164,7 @@ async function getMusicSheetResponseById(id, page, pagesize = 50) {
 
 async function getRecommendSheetTags() {
     const res = (await axios_1.default.get(`http://wapi.kuwo.cn/api/pc/classify/playlist/getTagList?cmd=rcm_keyword_playlist&user=0&prod=kwplayer_pc_9.0.5.0&vipver=9.0.5.0&source=kwplayer_pc_9.0.5.0&loginUid=0&loginSid=0&appUid=76039576`)).data.data;
-    console.log(res)
+    // console.log(res)
     const data = res
         .map((group) => ({
         title: group.name,
@@ -289,11 +289,7 @@ module.exports = {
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_2t58.js",
     cacheControl: "no-cache",
     hints: {
-        importMusicSheet: [
-            "VIP音源：自建歌单-分享-复制试听链接，直接粘贴即可",
-            "H5：复制URL并粘贴，或者直接输入纯数字歌单ID即可",
-            "导入过程中会过滤掉所有VIP/试听/收费音乐，导入时间和歌单大小有关，请耐心等待",
-        ],
+        importMusicSheet: [],
     },
 
     async search(query, page, type) {
@@ -331,11 +327,11 @@ module.exports = {
 //   }
 // getMediaSource(music_item)
 
-let top_item={
-    id: "/list/top.html",
-    coverImg: undefined,
-    title: "酷我飙升榜",
-    description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
-}
+// let top_item={
+//     id: "/list/top.html",
+//     coverImg: undefined,
+//     title: "酷我飙升榜",
+//     description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
+// }
 
-getTopListDetail(top_item)
+// getTopListDetail(top_item)
