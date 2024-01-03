@@ -6,6 +6,7 @@ const cheerio_1 = require("cheerio");
 const CryptoJS = require("crypto-js");
 
 const host = "http://ww" + "w.2t" + "58.com"
+const kwlogo = "https://tiebapic.baidu.com/forum/w%3D120%3Bh%3D120/sign=c152afebeac379317d68822bdbffdf78/2934349b033b5bb570484d1373d3d539b700bc44.jpg?tbpicau=2024-01-05-05_8e8d6cf789aa470e2b7d40e7ad9145c9"
 
 let search_key_word = ""
 
@@ -61,7 +62,7 @@ async function parse_top_list_html(raw_data) {
         let data_title = $(item[0]).text()
         top_list_arr.push({
             id: data_address, 
-            coverImg: undefined,
+            coverImg: kwlogo,
             title: data_title, 
             description: undefined
         })
