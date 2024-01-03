@@ -109,7 +109,14 @@ async function getTopLists() {
 
     return [{
         title: "官方榜单",
-        data: [toplist],
+        data: toplist.map((_) => {
+            return ({
+                id: _.id,
+                coverImg: _.coverImgco,
+                title: _.title,
+                description: _.description,
+            });
+        }),
     }];
 }
 

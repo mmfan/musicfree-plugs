@@ -292,7 +292,8 @@ async function getAlbumInfo(albumItem) {
 async function getTopLists() {
     const result = (await axios_1.default.get("http://wapi.kuwo.cn/api/pc/bang/list")).data
         .child;
-    return result.map((e) => ({
+
+        let return1 =  result.map((e) => ({
         title: e.disname,
         data: e.child.map((_) => {
             var _a, _b;
@@ -304,6 +305,7 @@ async function getTopLists() {
             });
         }),
     }));
+    return return1;
 }
 async function getTopListDetail(topListItem) {
     const res = await axios_1.default.get(`http://kbangserver.kuwo.cn/ksong.s`, {
