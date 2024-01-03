@@ -16,7 +16,7 @@ function formatMusicItem(_) {
     const albumname = _.albumname || _.album?.title;
     return {
         id: _.id,           // 音乐在2t58的id
-        songmid: undefined, // 音乐在酷我的id
+        songmid: _.lkid || undefined, // 音乐在酷我的id
         title: _.title,
         artist: _.artist,
         artwork: undefined,
@@ -67,12 +67,11 @@ async function getLyric(musicItem) {
     console.log("getLyric:", musicItem)
     const res = (await (0, axios_1.default)({
         method: "get",
-        url: "https://api.44" + "h4.com/lc.php?cid" + musicItem.songmid,
+        url: host+"/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
         timeout: 10000,
     })).data;
     
     return {
-        // rawLrc: "http://www.2t58.com/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
         rawLrc: res
     };
 }
