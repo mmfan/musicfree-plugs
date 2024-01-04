@@ -125,8 +125,8 @@ async function getLyric(musicItem) {
     })).data;
     res = res.replace("44h4", '****');  //屏蔽歌词中的网站信息
     res = res.replace("2t58", '****'); 
-    res = res.replace("欢迎来访", '****');  //屏蔽歌词中的网站信息
-    res = res.replace("爱听音乐网", '****');  //屏蔽歌词中的网站信息
+    res = res.replace("欢迎来访", '');  //屏蔽歌词中的网站信息
+    res = res.replace("爱听音乐网", '');  //屏蔽歌词中的网站信息
 
     return {
         rawLrc: res
