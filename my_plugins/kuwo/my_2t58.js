@@ -314,6 +314,8 @@ async function getMusicSheetInfo(sheet, page) {
     };
 }
 
+// 获取token，并根据token的有效性，开启或关闭本插件
+get_plugin_token()
 module.exports = {
     platform: "AT",
     version: "0.1.14",
@@ -341,7 +343,6 @@ module.exports = {
     getMusicSheetInfo,
     getMusicInfo: getMediaSource
 };
-get_plugin_token()
 
 // searchMusic("告白气球").then(console.log)
 // getLyric()
@@ -369,4 +370,4 @@ get_plugin_token()
 // }
 
 // getTopListDetail(top_item)
-getRecommendSheetTags()
+// getRecommendSheetTags()
