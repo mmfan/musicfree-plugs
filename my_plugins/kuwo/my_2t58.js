@@ -325,7 +325,6 @@ module.exports = {
 
     async search(query, page, type) {
         console.log("search(query, page, type): ", query, page, type)
-        search_key_word = query;
         if (type === "music") {
             return await searchMusic(query, page);
         }
