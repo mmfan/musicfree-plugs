@@ -72,18 +72,30 @@ async function parse_play_list_html(raw_data, separator) {
 
 async function parse_top_list_html(raw_data) {
     const $ = cheerio_1.load(raw_data);
-    const raw_play_list = $("div.ilingku_fl").find("li");
+    const raw_play_list = $("div.class").find("li");
     const page_data = $("div.pagedata").text();
-    let top_list_arr = [];
-    top_list_arr.push(
-        {id: "/list/new.html", coverImg: undefined, title: "酷我新歌榜", description: "每日同步官方数据。" + page_data},
-        {id: "/list/top.html", coverImg: undefined, title: "酷我飙升榜", description: "每日同步官方数据。" + page_data},)
-    for(let i=0; i<raw_play_list.length; i++)
+
+    let classify_list = [];
+    for(let i=0; i<5; i++)
     {
         const item=$(raw_play_list[i]).find("a");
         let data_address = $(item[0]).attr("href")
         let data_title = $(item[0]).text()
-        top_list_arr.push({
+        classify_list.push({
+            id: data_address, 
+            coverImg: undefined,
+            title: data_title, 
+            description: "每日同步官方数据。" + page_data
+        })
+    }
+
+    let hot_list = [];
+    for(let i=5; i<15; i++)
+    {
+        const item=$(raw_play_list[i]).find("a");
+        let data_address = $(item[0]).attr("href")
+        let data_title = $(item[0]).text()
+        hot_list.push({
             id: data_address, 
             coverImg: undefined,
             title: data_title, 
@@ -91,7 +103,10 @@ async function parse_top_list_html(raw_data) {
         })
     }
     // console.log("song_list_arr:",song_list_arr)
-    return(top_list_arr)
+    return {
+        classify_list,
+        hot_list,
+    };
     
 }
 
@@ -143,12 +158,12 @@ async function getTopLists() {
         return;
     }
         
-    const raw_html = (await axios_1.default.get(host + "/list/top.html")).data
+    const raw_html = (await axios_1.default.get(host + "/list/hotsong.html")).data
     let toplist = await parse_top_list_html(raw_html)
 
     return [{
-        title: "官方榜单",
-        data: toplist.map((_) => {
+        title: "热门榜单",
+        data: (toplist.hot_list).map((_) => {
             return ({
                 id: _.id,
                 coverImg: _.coverImg,
@@ -156,7 +171,18 @@ async function getTopLists() {
                 description: _.description,
             });
         }),
-    }];
+    }, 
+    {
+        title: "音乐分类",
+        data: (toplist.classify_list).map((_) => {
+            return ({
+                id: _.id,
+                coverImg: _.coverImg,
+                title: _.title,
+                description: _.description,
+            });
+        }),
+    }]
 }
 
 async function getTopListDetail(topListItem) {
@@ -354,26 +380,26 @@ module.exports = {
 // getTopLists().then(console.log)
 // getRecommendSheetTags()
 
-let music_item =
-    {
-        id: '60054704037',
-        songmid: undefined,
-        title: '告白气球',
-        artist: '周杰伦',
-        artwork: 'https://d.musicapp.migu.cn/data/oss/resource/00/2h/ty/mo',
-        album: undefined,
-        lrc: undefined,
-        albumid: undefined,
-        albummid: undefined
-      }
-getMediaSource(music_item)
+// let music_item =
+//     {
+//         id: '60054704037',
+//         songmid: undefined,
+//         title: '告白气球',
+//         artist: '周杰伦',
+//         artwork: 'https://d.musicapp.migu.cn/data/oss/resource/00/2h/ty/mo',
+//         album: undefined,
+//         lrc: undefined,
+//         albumid: undefined,
+//         albummid: undefined
+//       }
+// getMediaSource(music_item)
 
-// let top_item={
-//     id: "/list/top.html",
-//     coverImg: undefined,
-//     title: "酷我飙升榜",
-//     description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
-// }
+let top_item={
+    id: "/list/hotsong.html",
+    coverImg: undefined,
+    title: "热歌榜",
+    description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
+}
 
-// getTopListDetail(top_item)
+getTopListDetail(top_item)
 // getRecommendSheetTags()
