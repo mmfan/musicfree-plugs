@@ -335,8 +335,8 @@ module.exports = {
     getLyric,
     getTopLists,
     getTopListDetail,
-    // getRecommendSheetTags,
-    // getRecommendSheetsByTag,
+    getRecommendSheetTags,
+    getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
 get_plugin_token()
@@ -367,3 +367,4 @@ get_plugin_token()
 // }
 
 // getTopListDetail(top_item)
+getRecommendSheetTags()
