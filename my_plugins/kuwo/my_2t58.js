@@ -7,7 +7,7 @@ const CryptoJS = require("crypto-js");
 
 const host = "http://ww" + "w.2t" + "58.com"
 const token_host = "https://a" + "gi" + "t.ai"
-const token_txt = "token_date: 2023-12-21"
+const token_txt = "token_date: 2023-12-20"
 
 let enable_plugin = true;
 
