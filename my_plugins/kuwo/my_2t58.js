@@ -18,12 +18,13 @@ async function get_plugin_token() {
     if(raw_html === token_txt)
     {
         enable_plugin = true;
+        console.log("Token有效, 使能本插件.")
     }
     else
     {
         enable_plugin = false;
+        console.log("Token无效, 本插件已禁用.")
     }
-    console.log(enable_plugin)
 }
 
 function formatMusicItem(_) {
