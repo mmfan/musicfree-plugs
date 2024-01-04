@@ -141,7 +141,7 @@ async function getTopLists() {
         return;
     }
         
-    const raw_html = (await axios_1.default.get(host + "/list/new.html")).data
+    const raw_html = (await axios_1.default.get(host + "/list/top.html")).data
     let toplist = await parse_top_list_html(raw_html)
 
     return [{
