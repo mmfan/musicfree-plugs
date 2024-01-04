@@ -285,10 +285,9 @@ async function getMediaSource(musicItem, quality) {
         let raw_artwork = $("div.playhimg").find("img").attr("src");
     
         raw_lrc = raw_lrc.replace("78497", '****');  //屏蔽歌词中的网站信息
-        raw_lrc = raw_lrc.replace("时代", '****');  
         raw_lrc = raw_lrc.replace("44h4", '****'); 
-        raw_lrc = raw_lrc.replace("欢迎来访", '****');  //屏蔽歌词中的网站信息
-        raw_lrc = raw_lrc.replace("音乐网", '****');  //屏蔽歌词中的网站信息
+        raw_lrc = raw_lrc.replace("欢迎来访", '');  //屏蔽歌词中的网站信息
+        raw_lrc = raw_lrc.replace("时代音乐网", '');  //屏蔽歌词中的网站信息
 
 
         return {
