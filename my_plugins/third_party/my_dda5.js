@@ -74,7 +74,7 @@ async function parse_top_list_html(raw_data) {
     const $ = cheerio_1.load(raw_data);
     const raw_play_list = $("div.class").find("li");
     const page_data = $("div.pagedata").text();
-    let cover_img = "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/logo/mg.png"
+    let cover_img = "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/logo/mg.jpg"
     let classify_list = [];
     for(let i=0; i<5; i++)
     {
