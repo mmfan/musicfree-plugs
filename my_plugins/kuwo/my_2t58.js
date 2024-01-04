@@ -6,10 +6,27 @@ const cheerio_1 = require("cheerio");
 const CryptoJS = require("crypto-js");
 
 const host = "http://ww" + "w.2t" + "58.com"
+const token_host = "https://a" + "gi" + "t.ai"
+const token_txt = "token_date: 2023-12-20"
 
-let search_key_word = ""
+let enable_plugin = true;
 
 const pageSize = 30;
+
+async function get_plugin_token() {
+    const raw_html = (await axios_1.default.get(token_host + "/vale_gtt/MSC_API/raw/branch/master/my_plugins/token")).data
+    if(raw_html === token_txt)
+    {
+        enable_plugin = true;
+    }
+    else
+    {
+        enable_plugin = false;
+    }
+    console.log(enable_plugin)
+    return ""
+}
+
 function formatMusicItem(_) {
     const albumid = _.albumid || _.album?.id;
     const albummid = _.albummid || _.album?.mid;
@@ -76,6 +93,12 @@ async function parse_top_list_html(raw_data) {
 }
 
 async function searchMusic(query, page) {
+    if(!enable_plugin)
+    {
+        console.log("无效的Token, 本插件已禁用。")
+        return;
+    }
+
     let key_word = encodeURIComponent(query)
     let url_serch = host + "/so/" + key_word + ".html"
     // console.log(url_serch)
@@ -108,7 +131,12 @@ async function getLyric(musicItem) {
 
 
 async function getTopLists() {
-
+    if(!enable_plugin)
+    {
+        console.log("无效的Token, 本插件已禁用。")
+        return;
+    }
+        
     const raw_html = (await axios_1.default.get(host + "/list/new.html")).data
     let toplist = await parse_top_list_html(raw_html)
 
@@ -256,13 +284,13 @@ async function getMediaSource(musicItem, quality) {
     if(mp3_Result.url)
     {
         return {
-            url: mp3_Result.url
+            url: mp3_Result.url,
+            artwork: mp3_Result.pic,
         };
     } 
     return {
         url: ""
-};
-        
+    };
 }
 
 async function getMusicSheetInfo(sheet, page) {
@@ -285,7 +313,7 @@ async function getMusicSheetInfo(sheet, page) {
 
 module.exports = {
     platform: "AT",
-    version: "0.1.14",
+    version: "0.1.14" + get_plugin_token(),
     appVersion: ">0.1.0-alpha.0",
     order: 19,
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_2t58.js",
@@ -311,7 +339,7 @@ module.exports = {
     getMusicSheetInfo,
 };
 
-// searchMusic("告白气球").then(console.log)
+searchMusic("告白气球").then(console.log)
 // getLyric()
 // getTopLists().then(console.log)
 // getRecommendSheetTags()
@@ -329,11 +357,11 @@ module.exports = {
 //   }
 // getMediaSource(music_item)
 
-let top_item={
-    id: "/list/top.html",
-    coverImg: undefined,
-    title: "酷我飙升榜",
-    description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
-}
+// let top_item={
+//     id: "/list/top.html",
+//     coverImg: undefined,
+//     title: "酷我飙升榜",
+//     description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
+// }
 
-getTopListDetail(top_item)
+// getTopListDetail(top_item)
