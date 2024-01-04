@@ -5,7 +5,7 @@ const he = require("he");
 const cheerio_1 = require("cheerio");
 const CryptoJS = require("crypto-js");
 
-const host = "http://ww" + "w.2t" + "58.com"
+const host = "http://ww" + "w.78" + "497.com"
 const token_host = "https://a" + "gi" + "t.ai"
 const token_txt = "token_date: 2023-12-20"
 
@@ -47,17 +47,17 @@ function formatMusicItem(_) {
 
 async function parse_play_list_html(raw_data, separator) {
     const $ = cheerio_1.load(raw_data);
-    const raw_play_list = $("div.play_list").find("li");
+    const raw_play_list = $("div.search").find("li");
     let song_list_arr = [];
     for(let i=0; i<raw_play_list.length; i++)
     {
         const item=$(raw_play_list[i]).find("a");
         
-        let data_id = $(item[0]).attr("href").match(/\/song\/(.*?).html/)[1]
+        let data_id = $(item[0]).attr("href").match(/\/mp3\/(.*?).html/)[1]
         // console.log($(item[0]).text())
         let separated_text = $(item[0]).text().split(separator)
         let data_artist = separated_text[0] // 通过分隔符区分歌手和歌名
-        let data_title = separated_text[1]!="" ? separated_text[1]:separated_text[2]
+        let data_title = $(item[0]).attr("title")
         song_list_arr.push({
             id: data_id, 
             title: data_title, 
@@ -102,9 +102,10 @@ async function searchMusic(query, page) {
     }
 
     let key_word = encodeURIComponent(query)
-    let url_serch = host + "/so/" + key_word + ".html"
+    let url_serch = host + "/so.php?wd=" + key_word
     // console.log(url_serch)
     let search_res = (await axios_1.default.get(url_serch)).data
+    // console.log(search_res)
     let song_list = await parse_play_list_html(search_res, " - ")
 
     const songs = song_list.map(formatMusicItem);
@@ -271,26 +272,25 @@ async function getRecommendSheetsByTag(tag, page) {
 
 
 async function getMediaSource(musicItem, quality) {
-    // 2t58.com获取音源
-    let header = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Referer": host+`/song/${musicItem.id}.html`,
-    }
-    let mp3_Result = (await (0, axios_1.default)({
-        method: "post",
-        url: host + `/js/play.php`,
-        headers: header,
-        data: `id=${musicItem.id}&type=music`,
-    })).data;
-    console.log("search from third: ",mp3_Result)
+    // 78497.com获取音源
 
-    if(mp3_Result.url)
+    let mp3_Result = (await axios_1.default.get(host + `/mp3/${musicItem.id}.html`)).data
+
+    // console.log("search from third: ", mp3_Result)
+    if(mp3_Result)
     {
+        const $ = cheerio_1.load(mp3_Result);
+        const raw_lrc = $("div.gc").text();
+        const raw_url = $("div.bt_con").find("a").attr("href");
+        let raw_artwork = $("div.playhimg").find("img").attr("src");
+    
         return {
-            url: mp3_Result.url,
-            artwork: mp3_Result.pic,
+            url: raw_url,
+            rawLrc: raw_lrc,
+            artwork: raw_artwork,
         };
-    } 
+
+    }
     return {
         url: ""
     };
@@ -317,11 +317,11 @@ async function getMusicSheetInfo(sheet, page) {
 // 获取token，并根据token的有效性，开启或关闭本插件
 get_plugin_token()
 module.exports = {
-    platform: "WM",
+    platform: "SD",
     version: "0.1.14",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
-    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_2t58.js",
+    srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/third_party/my_78497.js",
     cacheControl: "no-cache",
     hints: {
         importMusicSheet: [],
@@ -335,7 +335,7 @@ module.exports = {
     },
 
     getMediaSource,
-    getLyric,
+    getLyric: getMediaSource,
     getTopLists,
     getTopListDetail,
     // getRecommendSheetTags,
@@ -350,17 +350,17 @@ module.exports = {
 // getRecommendSheetTags()
 
 // let music_item = {
-//     id: 'bnd4c3ZoZA',
-//     songmid: undefined,
-//     title: '告白气球',
-//     artist: '周杰伦',
-//     artwork: undefined,
-//     album: undefined,
-//     lrc: undefined,
-//     albumid: undefined,
-//     albummid: undefined
-//   }
-// getMediaSource(music_item)
+//       id: 'a39ad183a8a32e7d97b0320ff210ee32',
+//       songmid: undefined,
+//       title: '告白气球',
+//       artist: '周杰伦',
+//       artwork: undefined,
+//       album: undefined,
+//       lrc: undefined,
+//       albumid: undefined,
+//       albummid: undefined
+// }
+// getMediaSource(music_item).then(console.log)
 
 // let top_item={
 //     id: "/list/top.html",
