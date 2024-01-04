@@ -269,6 +269,7 @@ async function getRecommendSheetsByTag(tag, page) {
 }
 
 
+
 async function getMediaSource(musicItem, quality) {
     // 2t58.com获取音源
     let header = {
@@ -335,9 +336,10 @@ module.exports = {
     getLyric,
     getTopLists,
     getTopListDetail,
-    getRecommendSheetTags,
-    getRecommendSheetsByTag,
+    // getRecommendSheetTags,
+    // getRecommendSheetsByTag,
     getMusicSheetInfo,
+    getMusicInfo: getMediaSource
 };
 get_plugin_token()
 
