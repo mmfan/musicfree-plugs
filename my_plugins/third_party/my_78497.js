@@ -410,29 +410,29 @@ module.exports = {
 // getTopLists().then(console.log)
 // getRecommendSheetTags()
 
-let music_item = {
-      id: 'a39ad183a8a32e7d97b0320ff210ee32',
-      songmid: undefined,
-      title: '告白气球',
-      artist: '周杰伦',
-      artwork: undefined,
-      album: undefined,
-      lrc: undefined,
-      albumid: undefined,
-      albummid: undefined
-}
-let music_item_2 = {
-    id: '10986b847f4ddb6f42041b426f7756eb',
-    songmid: undefined,
-    title: '圣诞星 (改编版)',
-    artist: '大力滴滴滴',
-    artwork: undefined,
-    album: undefined,
-    lrc: undefined,
-    albumid: undefined,
-    albummid: undefined
-  }
-getMediaSource(music_item_2).then(console.log)
+// let music_item = {
+//       id: 'a39ad183a8a32e7d97b0320ff210ee32',
+//       songmid: undefined,
+//       title: '告白气球',
+//       artist: '周杰伦',
+//       artwork: undefined,
+//       album: undefined,
+//       lrc: undefined,
+//       albumid: undefined,
+//       albummid: undefined
+// }
+// let music_item_2 = {
+//     id: '10986b847f4ddb6f42041b426f7756eb',
+//     songmid: undefined,
+//     title: '圣诞星 (改编版)',
+//     artist: '大力滴滴滴',
+//     artwork: undefined,
+//     album: undefined,
+//     lrc: undefined,
+//     albumid: undefined,
+//     albummid: undefined
+//   }
+// getMediaSource(music_item_2).then(console.log)
 
 // let top_item={
 //     id: "/list/kugou.html",
