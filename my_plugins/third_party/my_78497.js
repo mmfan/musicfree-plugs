@@ -284,6 +284,13 @@ async function getMediaSource(musicItem, quality) {
         const raw_url = $("div.bt_con").find("a").attr("href");
         let raw_artwork = $("div.playhimg").find("img").attr("src");
     
+        raw_lrc = raw_lrc.replace("78497", '****');  //屏蔽歌词中的网站信息
+        raw_lrc = raw_lrc.replace("时代", '****');  
+        raw_lrc = raw_lrc.replace("44h4", '****'); 
+        raw_lrc = raw_lrc.replace("欢迎来访", '****');  //屏蔽歌词中的网站信息
+        raw_lrc = raw_lrc.replace("音乐网", '****');  //屏蔽歌词中的网站信息
+
+
         return {
             url: raw_url,
             rawLrc: raw_lrc,
