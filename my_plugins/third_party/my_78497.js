@@ -323,9 +323,12 @@ async function getRecommendSheetsByTag(tag, page) {
 
 async function getMediaSource(musicItem, quality) {
     // 78497.com获取音源
-
-    let mp3_Result = (await axios_1.default.get(host + `/mp3/${musicItem.id}.html`)).data
-
+    let req_url = host + `/mp3/${musicItem.id}.html`
+    let mp3_Result = (await (0, axios_1.default)({
+        url: req_url,
+        method: 'get',
+        timeout: 3000,
+    })).data;
     // console.log("search from third: ", mp3_Result)
     if(mp3_Result)
     {
@@ -334,18 +337,20 @@ async function getMediaSource(musicItem, quality) {
         const raw_url = $("div.bt_con").find("a").attr("href");
         let raw_artwork = $("div.playhimg").find("img").attr("src");
     
-        raw_lrc = raw_lrc.replace("78497", '****');  //屏蔽歌词中的网站信息
-        raw_lrc = raw_lrc.replace("44h4", '****'); 
-        raw_lrc = raw_lrc.replace("欢迎来访", '');  //屏蔽歌词中的网站信息
-        raw_lrc = raw_lrc.replace("时代音乐网", '');  //屏蔽歌词中的网站信息
 
-
-        return {
-            url: raw_url,
-            rawLrc: raw_lrc,
-            artwork: raw_artwork,
-        };
-
+        if(raw_url != "javascript:void(0);" && !raw_lrc)
+        {    
+            raw_lrc = raw_lrc.replace("78497", '****');  //屏蔽歌词中的网站信息
+            raw_lrc = raw_lrc.replace("44h4", '****'); 
+            raw_lrc = raw_lrc.replace("欢迎来访", '');  //屏蔽歌词中的网站信息
+            raw_lrc = raw_lrc.replace("时代音乐网", '');  //屏蔽歌词中的网站信息
+        
+            return {
+                url: raw_url,
+                rawLrc: raw_lrc,
+                artwork: raw_artwork,
+            };
+        }
     }
     return {
         url: ""
@@ -405,18 +410,18 @@ module.exports = {
 // getTopLists().then(console.log)
 // getRecommendSheetTags()
 
-// let music_item = {
-//       id: 'a39ad183a8a32e7d97b0320ff210ee32',
-//       songmid: undefined,
-//       title: '告白气球',
-//       artist: '周杰伦',
-//       artwork: undefined,
-//       album: undefined,
-//       lrc: undefined,
-//       albumid: undefined,
-//       albummid: undefined
-// }
-// getMediaSource(music_item).then(console.log)
+let music_item = {
+      id: 'a39ad183a8a32e7d97b0320ff210ee32',
+      songmid: undefined,
+      title: '告白气球',
+      artist: '周杰伦',
+      artwork: undefined,
+      album: undefined,
+      lrc: undefined,
+      albumid: undefined,
+      albummid: undefined
+}
+getMediaSource(music_item).then(console.log)
 
 // let top_item={
 //     id: "/list/kugou.html",
