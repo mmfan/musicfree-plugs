@@ -43,7 +43,7 @@ async function parse_play_list_html(raw_data, separator) {
         song_list_arr.push({
             id: data_id, 
             title: data_title, 
-            artist: data_artist
+            artist: data_artist,
         })
     }
     // console.log("song_list_arr:",song_list_arr)
@@ -53,10 +53,11 @@ async function parse_play_list_html(raw_data, separator) {
 async function parse_top_list_html(raw_data) {
     const $ = cheerio_1.load(raw_data);
     const raw_play_list = $("div.ilingku_fl").find("li");
+    const page_data = $("div.pagedata").text();
     let top_list_arr = [];
     top_list_arr.push(
-        {id: "/list/new.html", coverImg: undefined, title: "酷我新歌榜", description: "每日同步官方数据"},
-        {id: "/list/top.html", coverImg: undefined, title: "酷我飙升榜", description: "每日同步官方数据"},)
+        {id: "/list/new.html", coverImg: undefined, title: "酷我新歌榜", description: "每日同步官方数据。" + page_data},
+        {id: "/list/top.html", coverImg: undefined, title: "酷我飙升榜", description: "每日同步官方数据。" + page_data},)
     for(let i=0; i<raw_play_list.length; i++)
     {
         const item=$(raw_play_list[i]).find("a");
@@ -66,7 +67,7 @@ async function parse_top_list_html(raw_data) {
             id: data_address, 
             coverImg: undefined,
             title: data_title, 
-            description: "每日同步官方数据"
+            description: "每日同步官方数据。" + page_data
         })
     }
     // console.log("song_list_arr:",song_list_arr)
@@ -116,7 +117,7 @@ async function getTopLists() {
         data: toplist.map((_) => {
             return ({
                 id: _.id,
-                coverImg: _.coverImgco,
+                coverImg: _.coverImg,
                 title: _.title,
                 description: _.description,
             });
@@ -130,7 +131,6 @@ async function getTopListDetail(topListItem) {
     // console.log(url_serch)
     let search_res = (await axios_1.default.get(url_serch)).data
     let song_list = await parse_play_list_html(search_res, "_")
-
 
     let res =  {
         ...topListItem,
@@ -329,11 +329,11 @@ module.exports = {
 //   }
 // getMediaSource(music_item)
 
-// let top_item={
-//     id: "/list/top.html",
-//     coverImg: undefined,
-//     title: "酷我飙升榜",
-//     description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
-// }
+let top_item={
+    id: "/list/top.html",
+    coverImg: undefined,
+    title: "酷我飙升榜",
+    description: "酷我每日搜索热度飙升最快的歌曲排行榜，按搜索播放数据对比前一天涨幅排序，每天更新",
+}
 
-// getTopListDetail(top_item)
+getTopListDetail(top_item)
