@@ -93,6 +93,7 @@ async function parse_top_list_html(raw_data) {
 }
 
 async function searchMusic(query, page) {
+    console.log("searchMusic enable_plugin=", enable_plugin)
     if(!enable_plugin)
     {
         console.log("无效的Token, 本插件已禁用。")
