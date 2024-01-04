@@ -16,15 +16,16 @@ const pageSize = 30;
 async function get_plugin_token() {
     let raw_html = (await axios_1.default.get(token_host + "/vale_gtt/MSC_API/raw/branch/master/my_plugins/token")).data
     console.log("raw_html=",raw_html)
-    if(raw_html === token_txt)
-    {
-        enable_plugin = true;
-        console.log("Token有效, 已使能本插件.")
-    }
-    else
+    if(raw_html != token_txt)
     {
         enable_plugin = false;
         console.log("Token无效, 本插件已禁用.")
+        
+    }
+    else
+    {
+        enable_plugin = true;
+        console.log("Token有效, 已使能本插件.")
     }
 }
 
