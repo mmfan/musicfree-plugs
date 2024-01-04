@@ -311,12 +311,12 @@ async function getMediaSource(musicItem, quality) {
     if(mp3_Result.url)
     {
         return {
-            url: "http://live.ximalaya.com/radio-first-page-app/live/93/24.m3u",
+            url: "http://live.ximalaya.com/radio-first-page-app/live/93/24.m3u8",
             // artwork: mp3_Result.pic,
         };
     } 
     return {
-        url: "http://live.ximalaya.com/radio-first-page-app/live/93/24.m3u",
+        url: "http://live.ximalaya.com/radio-first-page-app/live/93/24.m3u8",
     };
 }
 
