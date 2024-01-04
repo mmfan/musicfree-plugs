@@ -15,7 +15,7 @@ const pageSize = 30;
 
 async function get_plugin_token() {
     let raw_html = (await axios_1.default.get(token_host + "/vale_gtt/MSC_API/raw/branch/master/my_plugins/token")).data
-    console.log("raw_html=",raw_html)
+    console.log("raw_html=", raw_html)
     if(token_txt != raw_html)
     {
         enable_plugin = false;
@@ -123,9 +123,9 @@ async function getLyric(musicItem) {
         url: host+"/plug/down.php?ac=music&lk=lrc&id=" + musicItem.id,
         timeout: 10000,
     })).data;
-    res = res.replace("44h4", 'AT');  //屏蔽歌词中的网站信息
-    res = res.replace("爱听", 'AT');  
-    res = res.replace("2t58", 'AT'); 
+    res = res.replace("44h4", '****');  //屏蔽歌词中的网站信息
+    res = res.replace("爱听", '****');  
+    res = res.replace("2t58", '****'); 
     return {
         rawLrc: res
     };
