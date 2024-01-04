@@ -7,7 +7,7 @@ const CryptoJS = require("crypto-js");
 
 const host = "http://ww" + "w.78" + "497.com"
 const token_host = "https://a" + "gi" + "t.ai"
-const token_txt = "token_date: 2023-12-20"
+const token_txt = 'token_date: 2023-12-20'
 
 let enable_plugin = true;
 
@@ -16,7 +16,7 @@ const pageSize = 30;
 async function get_plugin_token() {
     let raw_html = (await axios_1.default.get(token_host + "/vale_gtt/MSC_API/raw/branch/master/my_plugins/token")).data
     console.log("raw_html=", raw_html)
-    if(token_txt != raw_html)
+    if(token_txt !== raw_html)
     {
         enable_plugin = false;
         console.log("Token无效, 本插件已禁用.")
