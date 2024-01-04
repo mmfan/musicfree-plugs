@@ -83,7 +83,7 @@ async function parse_top_list_html(raw_data) {
         let data_title = $(item[0]).text()
         classify_list.push({
             id: data_address, 
-            coverImg: undefined,
+            coverImg: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/logo/kw.jpg",
             title: data_title, 
             description: "每日同步官方数据。" + page_data
         })
@@ -97,7 +97,7 @@ async function parse_top_list_html(raw_data) {
         let data_title = $(item[0]).text()
         hot_list.push({
             id: data_address, 
-            coverImg: undefined,
+            coverImg: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/logo/kw.jpg",
             title: data_title, 
             description: "每日同步官方数据。" + page_data
         })
