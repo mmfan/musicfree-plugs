@@ -333,13 +333,13 @@ async function getMediaSource(musicItem, quality) {
     if(mp3_Result)
     {
         const $ = cheerio_1.load(mp3_Result);
-        const raw_lrc = $("div.gc").text();
-        const raw_url = $("div.bt_con").find("a").attr("href");
+        let raw_lrc = $("div.gc").text();
+        let raw_url = $("div.bt_con").find("a").attr("href").replace("javascript:void(0);", null);
         let raw_artwork = $("div.playhimg").find("img").attr("src");
     
 
-        if(raw_url != "javascript:void(0);" && !raw_lrc)
-        {    
+        if(raw_url !== 'null')
+        {
             raw_lrc = raw_lrc.replace("78497", '****');  //屏蔽歌词中的网站信息
             raw_lrc = raw_lrc.replace("44h4", '****'); 
             raw_lrc = raw_lrc.replace("欢迎来访", '');  //屏蔽歌词中的网站信息
@@ -405,7 +405,7 @@ module.exports = {
     getMusicInfo: getMediaSource
 };
 
-// searchMusic("告白气球").then(console.log)
+// searchMusic("圣诞星").then(console.log)
 // getLyric()
 // getTopLists().then(console.log)
 // getRecommendSheetTags()
@@ -421,7 +421,18 @@ let music_item = {
       albumid: undefined,
       albummid: undefined
 }
-getMediaSource(music_item).then(console.log)
+let music_item_2 = {
+    id: '10986b847f4ddb6f42041b426f7756eb',
+    songmid: undefined,
+    title: '圣诞星 (改编版)',
+    artist: '大力滴滴滴',
+    artwork: undefined,
+    album: undefined,
+    lrc: undefined,
+    albumid: undefined,
+    albummid: undefined
+  }
+getMediaSource(music_item_2).then(console.log)
 
 // let top_item={
 //     id: "/list/kugou.html",
