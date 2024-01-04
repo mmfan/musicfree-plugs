@@ -24,7 +24,6 @@ async function get_plugin_token() {
         enable_plugin = false;
     }
     console.log(enable_plugin)
-    return ""
 }
 
 function formatMusicItem(_) {
@@ -313,7 +312,7 @@ async function getMusicSheetInfo(sheet, page) {
 
 module.exports = {
     platform: "AT",
-    version: "0.1.14" + get_plugin_token(),
+    version: "0.1.14",
     appVersion: ">0.1.0-alpha.0",
     order: 19,
     srcUrl: "https://agit.ai/vale_gtt/MSC_API/raw/branch/master/my_plugins/kuwo/my_2t58.js",
@@ -338,8 +337,9 @@ module.exports = {
     // getRecommendSheetsByTag,
     getMusicSheetInfo,
 };
+get_plugin_token()
 
-searchMusic("告白气球").then(console.log)
+// searchMusic("告白气球").then(console.log)
 // getLyric()
 // getTopLists().then(console.log)
 // getRecommendSheetTags()
